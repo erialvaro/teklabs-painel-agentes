@@ -1,0 +1,12 @@
+# Gerado em tempo de execução ou dados de quem usa
+__pycache__/
+*.pyc
+monitor/config.json
+monitor/endereco.txt
+monitor/planos/
+*.bak*
+
+# Nunca versionar credenciais
+.env
+auth.json
+*.key

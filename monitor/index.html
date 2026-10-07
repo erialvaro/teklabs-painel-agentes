@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de Agentes · TekLabs Digital</title>
+<meta name="author" content="Erick Álvaro da Silva · TekLabs Digital">
+<meta name="theme-color" content="#0b1f3a">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icone-192.png">
+<style>
+  :root {
+    --fundo: #f6f7f9;
+    --cartao: #ffffff;
+    --texto: #1b1f24;
+    --suave: #5c6570;
+    --linha: #e2e5ea;
+    --destaque: #2563eb;
+    --ok: #15803d;
+    --ok-fundo: #dcfce7;
+    --vivo: #16a34a;
+    --alerta: #b45309;
+    --alerta-fundo: #fef3c7;
+    --erro: #b91c1c;
+    --erro-fundo: #fee2e2;
+    --neutro-fundo: #eef0f3;
+    --barra-fundo: #e5e8ec;
+    --medido: #2563eb;
+    --estimado: #7c3aed;
+    --estimado-fundo: #f3effe;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #0f1215;
+      --cartao: #171b20;
+      --texto: #e6e9ed;
+      --suave: #9aa4b0;
+      --linha: #2a3038;
+      --destaque: #6ea0ff;
+      --ok: #4ade80;
+      --ok-fundo: #12301f;
+      --vivo: #4ade80;
+      --alerta: #fbbf24;
+      --alerta-fundo: #33270c;
+      --erro: #f87171;
+      --erro-fundo: #3a1414;
+      --neutro-fundo: #232830;
+      --barra-fundo: #262c34;
+      --medido: #6ea0ff;
+      --estimado: #b294ff;
+      --estimado-fundo: #221a36;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fundo); color: var(--texto);
+    font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  a { color: var(--destaque); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .pagina { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 18px; margin: 0; }
+  .sub { color: var(--suave); font-size: 13px; }
+  .legenda { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--suave); margin: 10px 0 20px; }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .amostra { width: 26px; height: 10px; border-radius: 5px; display: inline-block; }
+  .amostra.medido { background: var(--medido); }
+  .amostra.estimado { background: repeating-linear-gradient(135deg, var(--estimado) 0 4px, transparent 4px 8px); border: 1px solid var(--estimado); }
+  .aviso { background: var(--alerta-fundo); color: var(--alerta); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .cartao { background: var(--cartao); border: 1px solid var(--linha); border-radius: 12px; padding: 16px; }
+  a.cartao { display: block; color: inherit; }
+  a.cartao:hover { text-decoration: none; border-color: var(--destaque); }
+  .cartao.apagado { opacity: .55; }
+  .cartao .topo { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .nome-projeto { font-weight: 600; font-size: 16px; word-break: break-word; }
+  .time-nome { color: var(--suave); font-size: 13px; margin-top: 2px; }
+  .vazio { color: var(--suave); font-size: 14px; margin-top: 6px; }
+
+  .selo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; background: var(--neutro-fundo); color: var(--suave); }
+  .selo.trabalhando { background: var(--ok-fundo); color: var(--ok); }
+  .selo.concluido { background: var(--neutro-fundo); color: var(--texto); }
+  .selo.andamento { background: var(--neutro-fundo); color: var(--destaque); }
+  .selo.parado, .selo.interrompido { background: var(--alerta-fundo); color: var(--alerta); }
+  .selo.falhou { background: var(--erro-fundo); color: var(--erro); }
+  .ponto { width: 8px; height: 8px; border-radius: 50%; background: var(--vivo); position: relative; flex: none; }
+  .ponto::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--vivo); animation: pulso 1.6s ease-out infinite; }
+  @keyframes pulso { from { transform: scale(.5); opacity: .9; } to { transform: scale(1.6); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .ponto::after { animation: none; opacity: .5; } }
+
+  .bloco { margin-top: 12px; border-radius: 8px; padding: 10px 12px; }
+  .bloco.medido { border: 1px solid var(--linha); }
+  .bloco.estimado { background: var(--estimado-fundo); border: 1px dashed var(--estimado); }
+  .rotulo { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+  .bloco.medido .rotulo { color: var(--medido); }
+  .bloco.estimado .rotulo { color: var(--estimado); }
+  .numeros { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; }
+  .numeros b { font-variant-numeric: tabular-nums; }
+  .barra { height: 10px; border-radius: 5px; background: var(--barra-fundo); overflow: hidden; margin: 6px 0 4px; }
+  .barra > i { display: block; height: 100%; border-radius: 5px; }
+  .barra.medido > i { background: var(--medido); }
+  .barra.estimado > i { background: repeating-linear-gradient(135deg, var(--estimado) 0 6px, color-mix(in srgb, var(--estimado) 55%, transparent) 6px 12px); }
+  .nota { font-size: 12px; color: var(--suave); }
+  .marca { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 0 14px; margin-bottom: 14px; border-bottom: 1px solid var(--linha); }
+  .marca .logo { border-radius: 6px; display: block; }
+  .marca-texto { display: flex; flex-direction: column; line-height: 1.2; }
+  .marca-nome { font-weight: 700; letter-spacing: .02em; }
+  .marca-lema { font-size: 12px; color: var(--suave); }
+  .assinatura { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--suave); }
+  .assinatura { gap: 5px; }
+  .autor { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+  .linkedin { display: inline-flex; color: #0a66c2; }
+  .linkedin:hover { opacity: .8; }
+  @media (prefers-color-scheme: dark) { .linkedin { color: #70b5f9; } }
+  @media (max-width: 640px) { .assinatura { margin-left: 0; } }
+  .bloco.declarado { border: 1px solid var(--linha); background: var(--neutro-fundo); }
+  .bloco.declarado .rotulo { color: var(--suave); }
+  .linha-fase { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid var(--linha); }
+  .linha-fase:last-child { border-bottom: 0; }
+  .linha-fase > .nota:last-child { flex-basis: 100%; }
+  .amostra.declarado { background: var(--neutro-fundo); border: 1px solid var(--suave); }
+  .gerente { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 14px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--linha); }
+
+  .voltar { display: inline-block; margin-bottom: 14px; font-size: 14px; }
+  .time { margin-bottom: 18px; }
+  .time .cabeca { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .etiqueta { font-size: 12px; border: 1px solid var(--linha); border-radius: 6px; padding: 1px 7px; color: var(--suave); }
+  .colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .colunas { grid-template-columns: 1fr; } }
+
+  .fases { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .fase { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--linha); color: var(--suave); }
+  .fase.feita { background: var(--ok-fundo); color: var(--ok); border-color: transparent; }
+  .fase.atual { border: 2px solid var(--destaque); color: var(--texto); font-weight: 600; }
+  .fase small { opacity: .8; font-weight: 400; }
+
+  .tabela-envolve { overflow-x: auto; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--linha); vertical-align: middle; }
+  th { font-size: 12px; color: var(--suave); font-weight: 600; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rodape { margin-top: 28px; font-size: 12px; color: var(--suave); }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <div class="marca">
+    <img class="logo" src="/icons/logo-teklabs.svg" alt="teklabs" width="84" height="30">
+    <span class="marca-texto"><span class="marca-nome">TekLabs Digital</span><span class="marca-lema">Open Source Software &amp; AI</span></span>
+    <span class="assinatura">Criado por:
+      <a class="autor" href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer">Erick Álvaro da Silva</a>
+      · TekLabs Digital ·
+      <a class="linkedin" href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer"
+         title="LinkedIn de Erick Álvaro da Silva" aria-label="LinkedIn de Erick Álvaro da Silva">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+      </a>
+    </span>
+  </div>
+  <header>
+    <h1><a href="#/" style="color:inherit">Painel dos times de agentes</a></h1>
+    <div class="sub" id="status">carregando...</div>
+  </header>
+  <div class="legenda">
+    <span><i class="amostra medido"></i> Medido: lido dos arquivos agora</span>
+    <span><i class="amostra estimado"></i> Estimativa: cálculo aproximado, pode mudar</span>
+    <span><i class="amostra declarado"></i> Informado pelo gerente: situação das fases no plano</span>
+    <span><i class="ponto"></i> Trabalhando: escreveu nos últimos 90 segundos</span>
+  </div>
+  <div id="conteudo"></div>
+  <div class="rodape">Atualiza sozinho a cada 5 segundos. O painel só lê arquivos e não interfere nos agentes.</div>
+</div>
+
+<script>
+const SEM_PROJETO = "__sem_projeto__";
+let dados = null;
+let erro = null;
+let erroConexao = false;
+let ultimaCarga = 0;
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function duracao(seg) {
+  if (seg == null || !isFinite(seg)) return "sem dado";
+  seg = Math.max(0, Math.round(seg));
+  if (seg < 60) return seg + " s";
+  const min = Math.floor(seg / 60);
+  if (min < 60) return min + " min" + (seg % 60 && min < 10 ? " " + (seg % 60) + " s" : "");
+  const h = Math.floor(min / 60);
+  return h + " h" + (min % 60 ? " " + (min % 60) + " min" : "");
+}
+function haQuanto(epoch) {
+  if (!epoch) return "sem dado";
+  return "há " + duracao(dados.agora - epoch);
+}
+function hora(epoch) {
+  if (!epoch) return "sem dado";
+  const d = new Date(epoch * 1000), hoje = new Date();
+  const h = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return d.toDateString() === hoje.toDateString() ? h : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " " + h;
+}
+function tokens(n) {
+  if (n == null) return "sem dado";
+  if (n < 1000) return String(n);
+  if (n < 1e6) return Math.round(n / 1000).toLocaleString("pt-BR") + " mil";
+  return (n / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mi";
+}
+function detalheConsumo(c) {
+  if (!c) return "";
+  const modelos = Object.entries(c.modelos || {}).map(([m, n]) => `${m}: ${n}`).join(", ");
+  return `${c.chamadas} chamadas · entrada ${tokens(c.entrada)} · cache criado ${tokens(c.cache_criado)} · cache lido ${tokens(c.cache_lido)} · saída ${tokens(c.saida)}${modelos ? " · " + modelos : ""}`;
+}
+function consumoCurto(c) {
+  if (!c || !c.chamadas) return "sem dado";
+  return `<span title="${esc(detalheConsumo(c))}">${tokens(c.equivalente)}</span>`;
+}
+function tamanho(b) {
+  if (!b) return "nada ainda";
+  if (b < 1024) return b + " bytes";
+  if (b < 1024 * 1024) return Math.round(b / 1024).toLocaleString("pt-BR") + " KB";
+  return (b / 1024 / 1024).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " MB";
+}
+
+const TEXTO_SITUACAO = {
+  "trabalhando": "trabalhando",
+  "em andamento": "em andamento, sem escrever agora",
+  "na fila": "na fila",
+  "concluído": "concluído",
+  "repetido": "repetido (outra tentativa concluiu)",
+  "falhou": "falhou",
+  "interrompido": "interrompido",
+  "parado": "parado, sem sinal de conclusão",
+  "encerrado": "encerrado",
+  "ocupado": "ocupado, sem escrever agora",
+  "ocioso": "ocioso, aguardando você",
+  "fechado": "sessão fechada",
+  "aguardando": "aguardando você",
+  "inativo": "sem tarefa em andamento",
+};
+const CLASSE_SITUACAO = {
+  "trabalhando": "trabalhando", "em andamento": "andamento", "na fila": "",
+  "concluído": "concluido", "repetido": "", "falhou": "falhou",
+  "interrompido": "interrompido", "parado": "parado", "encerrado": "concluido",
+  "ocupado": "andamento", "ocioso": "", "fechado": "", "aguardando": "parado", "inativo": "",
+};
+function tokensCodex(tk) {
+  if (!tk) return "sem dado";
+  return `<span title="${esc(`entrada ${tokens(tk.entrada)} (das quais ${tokens(tk.cache)} em cache) · saída ${tokens(tk.saida)} (raciocínio ${tokens(tk.raciocinio)})`)}">${tokens(tk.total)}</span>`;
+}
+function selo(sit) {
+  const ponto = sit === "trabalhando" ? '<i class="ponto"></i>' : "";
+  return `<span class="selo ${CLASSE_SITUACAO[sit] ?? ""}">${ponto}${esc(TEXTO_SITUACAO[sit] ?? sit)}</span>`;
+}
+
+function blocoMedido(t, compacto) {
+  const m = t.medido;
+  const pct = m.lancados ? Math.round((100 * m.concluidos) / m.lancados) : 0;
+  const palavra = t.tipo === "workflow"
+    ? (m.lancados === 1 ? "agente lançado" : "agentes lançados")
+    : (m.lancados === 1 ? "agente iniciado" : "agentes iniciados");
+  const itens = [
+    `<span><b>${m.lancados}</b> ${palavra}</span>`,
+    `<span><b>${m.concluidos}</b> ${m.concluidos === 1 ? "encerrado" : "encerrados"}</span>`,
+    `<span><b>${m.trabalhando}</b> trabalhando agora</span>`,
+  ];
+  if (t.tipo === "workflow" && m.iniciados !== m.lancados) itens.splice(1, 0, `<span><b>${m.iniciados}</b> já começaram</span>`);
+  if (m.repetidos) itens.push(`<span><b>${m.repetidos}</b> repetidos</span>`);
+  if (m.falharam) itens.push(`<span><b>${m.falharam}</b> falharam ou interrompidos</span>`);
+  if (!compacto) itens.push(`<span>rodando há <b>${duracao((t.situacao === "encerrado" ? t.ultima_escrita : dados.agora) - t.inicio)}</b></span>`);
+  const barra = t.tipo === "agentes"
+    ? `<div class="barra medido" title="${pct}% dos agentes já iniciados"><i style="width:${pct}%"></i></div>
+       <div class="nota">${m.concluidos} de ${m.lancados} agentes já iniciados terminaram. Não é o progresso do trabalho todo: o gerente pode iniciar mais agentes.</div>`
+    : "";
+  const g = t.gerente;
+  const linhaGerente = g
+    ? `<div class="gerente">Gerente: ${selo(g.situacao)}${g.motivo ? `<b>${esc(g.motivo)}</b>` : ""}<span class="nota">${g.nome_sessao ? "sessão " + esc(g.nome_sessao) + " · " : ""}última escrita na conversa ${haQuanto(g.ultima_escrita)}</span></div>`
+    : "";
+  if (!compacto && t.tipo === "codex") {
+    itens.push(`<span>tokens da conversa (contagem do Codex): <b>${tokensCodex(t.tokens_codex)}</b></span>`);
+    if (t.tokens_codex_subagentes) itens.push(`<span>subagentes: <b>${tokensCodex(t.tokens_codex_subagentes)}</b></span>`);
+  }
+  if (!compacto && (t.consumo_agentes || t.consumo_gerente)) {
+    itens.push(`<span>tokens dos agentes: <b>${consumoCurto(t.consumo_agentes)}</b></span>`);
+    if (t.consumo_gerente) itens.push(`<span>conversa do gerente (inteira): <b>${consumoCurto(t.consumo_gerente)}</b></span>`);
+  }
+  const semAgentes = t.tipo === "agentes" && !m.lancados;
+  const corpo = semAgentes
+    ? `<div class="nota">Nenhum especialista lançado ainda nesta sessão. Eles aparecem aqui assim que começarem.</div>`
+    : `<div class="numeros">${itens.join("")}</div>${barra}`;
+  return `<div class="bloco medido"><div class="rotulo">Medido</div>${linhaGerente}${corpo}</div>`;
+}
+
+function blocoEstimativa(t) {
+  const e = t.estimativa;
+  if (!e.base) {
+    return `<div class="bloco estimado"><div class="rotulo">Estimativa</div><div>${esc(t.tipo === "agentes" ? "Sem base para estimar: este time não tem fases declaradas." : "Sem base para estimar ainda.")}</div><div class="nota">${esc(e.motivo)}</div></div>`;
+  }
+  const falta = e.restante_segundos == null ? "sem base para o tempo restante" : e.restante_segundos === 0 ? "terminado" : "faltam cerca de " + duracao(e.restante_segundos);
+  return `<div class="bloco estimado"><div class="rotulo">Estimativa</div>
+    <div class="numeros"><span><b>${e.porcentagem}%</b> concluído</span><span>${falta}</span><span>cerca de <b>${e.total}</b> agentes no total</span></div>
+    <div class="barra estimado"><i style="width:${e.porcentagem}%"></i></div>
+    <div class="nota">É uma estimativa. O total de agentes não está gravado em lugar nenhum: foi calculado com a média de ${Number(e.media_por_fase).toLocaleString("pt-BR")} agentes por fase já concluída, vezes ${e.fases_restantes} ${e.fases_restantes === 1 ? "fase que falta" : "fases que faltam"}, somada aos agentes já lançados.</div></div>`;
+}
+
+function timesDoProjeto(nome) {
+  return dados.times.filter((t) => (nome === SEM_PROJETO ? t.projeto == null : t.projeto === nome));
+}
+
+function planosDoProjeto(nome) {
+  return (dados.planos || []).filter((p) => (nome === SEM_PROJETO ? p.projeto == null : p.projeto === nome));
+}
+
+const CLASSE_FASE_PLANO = { "aprovada": "feita", "em andamento": "atual", "em QA": "atual", "pendente": "futura" };
+
+function faseAtualDoPlano(p) {
+  return p.fases.find((f) => f.situacao === "em QA" || f.situacao === "em andamento")
+    || p.fases.find((f) => f.situacao === "pendente") || null;
+}
+
+function resumoPlano(p) {
+  const atual = faseAtualDoPlano(p);
+  const onde = p.situacao !== "em andamento" ? esc(p.situacao)
+    : atual ? `${esc(atual.id)} ${esc(atual.situacao)}` : "todas as fases aprovadas";
+  return `<div class="bloco declarado"><div class="rotulo">Plano (informado pelo gerente)</div>
+    <div>${esc(p.demanda)}</div>
+    <div class="numeros"><span><b>${p.fases_aprovadas}</b> de <b>${p.total_fases}</b> fases aprovadas pelo QA</span><span>agora: ${onde}</span></div></div>`;
+}
+
+function blocoPlano(p) {
+  const linhas = p.fases.map((f) => {
+    const subs = f.subfases.length
+      ? `<div class="nota">${f.subfases.map((s) => `${esc(s.id)} ${esc(s.titulo)}: ${esc(s.situacao)}${s.agentes ? ` (${s.agentes} ${s.agentes === 1 ? "agente" : "agentes"})` : ""}`).join(" · ")}</div>`
+      : "";
+    const qa = f.qa.length ? `QA: ${f.qa.map((q) => selo(q.situacao)).join(" ")}` : "QA: ainda não chamado";
+    return `<div class="linha-fase">
+      <span class="fase ${CLASSE_FASE_PLANO[f.situacao] ?? ""}">${f.situacao === "aprovada" ? "✓ " : ""}${esc(f.id)} ${esc(f.titulo)} <small>${esc(f.situacao)}</small></span>
+      <span class="nota">medido: ${f.agentes} ${f.agentes === 1 ? "agente" : "agentes"}, ${f.trabalhando} trabalhando, ${f.encerrados} encerrados · ${qa} · tokens: especialistas ${consumoCurto(f.consumo_especialistas)}, QA ${consumoCurto(f.consumo_qa)}</span>
+      ${subs}</div>`;
+  }).join("");
+  const e = p.estimativa;
+  const est = e.base
+    ? `<div class="numeros"><span>${e.restante_segundos ? "faltam cerca de <b>" + duracao(e.restante_segundos) + "</b>" : "terminado"}</span>${e.total_agentes != null ? `<span>cerca de <b>${e.total_agentes}</b> agentes no total</span>` : ""}</div>
+       <div class="nota">É uma estimativa pelo ritmo das fases já aprovadas: tempo desde o início dividido pelas fases aprovadas, vezes as que faltam.</div>`
+    : `<div>${esc(e.motivo)}</div>`;
+  const semLigacao = p.agentes_ligados ? "" : `<div class="nota" style="margin-top:6px">Nenhum agente com o código da fase no nome (ex.: "F1.2 Especialista ...") foi encontrado ainda.</div>`;
+  return `<section class="cartao time">
+    <div class="cabeca"><h2>Plano: ${esc(p.demanda)}</h2><span class="etiqueta">${esc(p.situacao)}</span></div>
+    <div class="nota" style="margin-top:4px">Criado ${hora(p.criado_em)} · atualizado ${haQuanto(p.atualizado_em)} · arquivo ${esc(p.arquivo)}</div>
+    <div class="bloco declarado"><div class="rotulo">Fases (situação informada pelo gerente; agentes medidos)</div>${linhas}${semLigacao}</div>
+    <div class="bloco estimado"><div class="rotulo">Estimativa</div>${est}</div>
+  </section>`;
+}
+
+function telaLista() {
+  const cartoes = [];
+  const semProjeto = timesDoProjeto(SEM_PROJETO);
+  const lista = dados.projetos.slice();
+  for (const p of lista) {
+    const times = timesDoProjeto(p.nome);
+    const href = "#/projeto/" + encodeURIComponent(p.nome);
+    const plano = planosDoProjeto(p.nome).find((x) => x.situacao === "em andamento");
+    const linhaPlano = plano ? resumoPlano(plano) : "";
+    if (!times.length && plano) {
+      cartoes.push(`<a class="cartao" href="${href}"><div class="nome-projeto">${esc(p.nome)}</div>${linhaPlano}</a>`);
+      continue;
+    }
+    if (!times.length) {
+      cartoes.push(`<a class="cartao apagado" href="${href}"><div class="nome-projeto">${esc(p.nome)}</div>
+        <div class="vazio">${p.algum_time ? "nenhum time nos últimos 7 dias" : "nenhum time ainda"}</div></a>`);
+      continue;
+    }
+    const t = times.find((x) => x.situacao === "aguardando") || times.find((x) => x.situacao === "trabalhando") || times[0];
+    const outros = times.length > 1 ? `<div class="nota" style="margin-top:8px">mais ${times.length - 1} ${times.length === 2 ? "time" : "times"} nos últimos 7 dias</div>` : "";
+    cartoes.push(`<a class="cartao" href="${href}">
+      <div class="topo"><div><div class="nome-projeto">${esc(p.nome)}</div><div class="time-nome">${esc(t.nome)} · última escrita ${haQuanto(t.ultima_escrita)}</div></div>${selo(t.situacao)}</div>
+      ${linhaPlano}${blocoMedido(t, true)}${plano ? "" : blocoEstimativa(t)}${outros}</a>`);
+  }
+  const planosSemProjeto = planosDoProjeto(SEM_PROJETO);
+  if (semProjeto.length || planosSemProjeto.length) {
+    const t = semProjeto[0];
+    const partes = [];
+    if (semProjeto.length) partes.push(`${semProjeto.length} ${semProjeto.length === 1 ? "time" : "times"}`);
+    if (planosSemProjeto.length) partes.push(`${planosSemProjeto.length} ${planosSemProjeto.length === 1 ? "plano" : "planos"}`);
+    cartoes.push(`<a class="cartao" href="#/projeto/${SEM_PROJETO}">
+      <div class="topo"><div><div class="nome-projeto">Sem projeto identificado</div><div class="time-nome">${partes.join(" e ")} fora das pastas da workspace</div></div>${t ? selo(t.situacao) : ""}</div></a>`);
+  }
+  const aviso = dados.workspace_existe ? "" : `<div class="aviso">A pasta da workspace não foi encontrada: ${esc(dados.workspace)}. Veja no README como mudar.</div>`;
+  return `${aviso}<div class="sub" style="margin-bottom:12px">Projetos em ${esc(dados.workspace)}</div><div class="grade">${cartoes.join("")}</div>`;
+}
+
+function blocoFases(t) {
+  if (!t.fases.length) return "";
+  const nomes = { feita: "feita", atual: "atual", futura: "ainda não começou" };
+  const itens = t.fases.map((f) => `<span class="fase ${f.estado}" title="${nomes[f.estado]}">${f.estado === "feita" ? "✓ " : ""}${esc(f.titulo)} <small>${f.agentes} ${f.agentes === 1 ? "agente" : "agentes"}</small></span>`).join("");
+  return `<div class="bloco medido"><div class="rotulo">Fases (medido)</div><div class="fases">${itens}</div>
+    <div class="nota" style="margin-top:6px">Verde: feita. Contorno azul: atual. Cinza: ainda não começou.</div></div>`;
+}
+
+function tabelaAgentes(t) {
+  const temFase = t.tipo === "workflow" || t.agentes.some((a) => a.fase);
+  const linhas = t.agentes.map((a) => `<tr>
+      <td>${esc(a.nome)}</td>
+      ${temFase ? `<td>${esc(a.fase ?? "sem fase")}</td>` : ""}
+      <td>${selo(a.situacao)}</td>
+      <td class="num">${a.inicio ? hora(a.inicio) : "sem dado"}</td>
+      <td class="num">${duracao(a.duracao)}</td>
+      <td class="num">${a.ultima_escrita ? haQuanto(a.ultima_escrita) : "sem dado"}</td>
+      <td class="num">${tamanho(a.bytes)}</td>
+      <td class="num">${a.tokens_codex ? tokensCodex(a.tokens_codex) + " <small>Codex</small>" : consumoCurto(a.consumo)}</td>
+    </tr>`).join("");
+  return `<div class="tabela-envolve"><table>
+    <thead><tr><th>Agente</th>${temFase ? "<th>Fase</th>" : ""}<th>Situação</th><th>Começou</th><th>Tempo</th><th>Última escrita</th><th>Quanto escreveu</th><th title="Tokens equivalentes de entrada: entrada + 1,25 × cache criado + 0,1 × cache lido + 5 × saída. Passe o mouse no número para ver o detalhe.">Tokens (equiv.)</th></tr></thead>
+    <tbody>${linhas || `<tr><td colspan="8" class="nota">Nenhum agente ainda.</td></tr>`}</tbody></table></div>`;
+}
+
+function telaProjeto(nome) {
+  const titulo = nome === SEM_PROJETO ? "Sem projeto identificado" : nome;
+  const times = timesDoProjeto(nome);
+  const corpo = times.length ? times.map((t) => {
+    const tipo = t.tipo === "agentes" ? "agentes avulsos" : t.tipo === "codex" ? "Codex" : "time com roteiro";
+    const criterio = t.criterio_projeto.length ? "Projeto identificado por: " + t.criterio_projeto.join("; ") : "Projeto não identificado";
+    const naoConfirmado = t.tipo === "workflow" && !t.result_visto
+      ? `<div class="nota" style="margin-top:4px">Nenhum agente deste time registrou conclusão ainda. O formato desse registro ainda não foi visto num caso real; se um agente terminar e continuar aparecendo como em andamento, avise.</div>`
+      : "";
+    const semRoteiro = t.tipo === "workflow" && !t.roteiro_encontrado ? `<div class="nota">Roteiro do time não encontrado: sem nome nem fases declaradas.</div>` : "";
+    return `<section class="cartao time">
+      <div class="cabeca"><h2>${esc(t.nome)}</h2>${selo(t.situacao)}<span class="etiqueta">${tipo}</span></div>
+      <div class="nota" style="margin-top:4px">Começou ${hora(t.inicio)} · última escrita ${haQuanto(t.ultima_escrita)} · ${esc(criterio)}${t.tipo === "codex" && !t.projeto && t.pasta_codex ? " · pasta do Codex: " + esc(t.pasta_codex) : ""}</div>
+      ${semRoteiro}${naoConfirmado}
+      ${blocoFases(t)}
+      <div class="colunas">${blocoMedido(t, false)}${blocoEstimativa(t)}</div>
+      ${tabelaAgentes(t)}
+    </section>`;
+  }).join("") : `<div class="cartao apagado"><div class="vazio">Nenhum time trabalhou neste projeto nos últimos 7 dias.</div></div>`;
+  const planos = planosDoProjeto(nome).map(blocoPlano).join("");
+  return `<a class="voltar" href="#/">← todos os projetos</a>
+    <h2 style="font-size:20px;margin-bottom:12px">${esc(titulo)}</h2>${planos}${corpo}`;
+}
+
+function desenhar() {
+  const alvo = document.getElementById("conteudo");
+  if (!dados) { alvo.innerHTML = erro ? `<div class="aviso">${esc(erro)}</div>` : ""; return; }
+  const m = location.hash.match(/^#\/projeto\/(.+)$/);
+  const falha = erro ? `<div class="aviso">A última atualização falhou (${esc(erro)}). Mostrando os dados de ${haQuantoLocal(ultimaCarga)}.</div>` : "";
+  const avisos = (dados.avisos || []).length
+    ? `<div class="aviso">${dados.avisos.length === 1 ? "Um item não pôde ser lido e ficou de fora" : dados.avisos.length + " itens não puderam ser lidos e ficaram de fora"}: ${dados.avisos.map(esc).join("; ")}</div>`
+    : "";
+  const avisoPorta = dados.aviso_porta ? `<div class="aviso">${esc(dados.aviso_porta)}</div>` : "";
+  alvo.innerHTML = falha + avisoPorta + avisos +(m ? telaProjeto(decodeURIComponent(m[1])) : telaLista());
+}
+
+function haQuantoLocal(ms) {
+  return "há " + duracao((Date.now() - ms) / 1000);
+}
+
+function atualizarStatus() {
+  const el = document.getElementById("status");
+  if (erro) { el.textContent = erroConexao ? "o servidor do painel está desligado (veja no README como abrir)" : "erro ao ler os dados: " + erro; return; }
+  if (!ultimaCarga) return;
+  el.textContent = "atualizado há " + Math.round((Date.now() - ultimaCarga) / 1000) + " s";
+}
+
+async function carregar() {
+  let r;
+  try {
+    r = await fetch("/api/estado", { cache: "no-store" });
+  } catch (e) {
+    erro = e.message || String(e); erroConexao = true;
+    desenhar(); atualizarStatus(); return;
+  }
+  try {
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.erro || "erro " + r.status);
+    dados = j; erro = null; erroConexao = false; ultimaCarga = Date.now();
+  } catch (e) {
+    erro = e.message || String(e); erroConexao = false;
+  }
+  desenhar();
+  atualizarStatus();
+}
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch(() => {});  // sem service worker o painel funciona igual, só não instala
+}
+window.addEventListener("hashchange", () => { desenhar(); window.scrollTo(0, 0); });
+carregar();
+setInterval(carregar, 5000);
+setInterval(atualizarStatus, 1000);
+</script>
+</body>
+</html>
