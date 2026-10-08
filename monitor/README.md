@@ -80,6 +80,20 @@ o criador do projeto.
 A página se atualiza sozinha a cada 5 segundos. Funciona nos temas claro e escuro
 do sistema e em janelas estreitas.
 
+### Arquivar projetos
+
+No detalhe de um projeto, o botão **Arquivar** tira o projeto da lista principal
+(e dos números do topo). Ele passa a aparecer em **Arquivados** (link ao lado da
+busca), de onde volta com **Desarquivar**.
+
+- Arquivar é **só do painel**: a pasta e os arquivos do projeto não mudam, e nada
+  é gravado nas pastas do Claude Code ou do Codex. A lista fica em
+  `~/.claude/monitor/arquivados.json` (preservada pelo instalador).
+- O projeto arquivado continua sendo medido. Se um time dele estiver trabalhando
+  ou com o gerente esperando você, a lista principal mostra um aviso com o link.
+- A gravação só aceita pedidos da própria página do painel (mesma origem e corpo
+  JSON); um site aberto em outra aba não consegue arquivar nada.
+
 ## Codex
 
 O painel também mostra as conversas do Codex (extensão do VS Code e Codex

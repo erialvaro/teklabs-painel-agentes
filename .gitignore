@@ -4,6 +4,8 @@ __pycache__/
 monitor/config.json
 monitor/endereco.txt
 monitor/planos/
+monitor/arquivados.json
+monitor/arquivados.tmp
 *.bak*
 
 # Nunca versionar credenciais

@@ -1,7 +1,8 @@
 """Painel local dos times de agentes.
 
 Só lê arquivos. Nada é criado, alterado ou travado dentro de .claude/projects.
-Única escrita do painel: o arquivo endereco.txt ao lado deste script.
+Escritas do painel, todas na própria pasta dele: endereco.txt (URL em uso) e
+arquivados.json (projetos arquivados pelo botão Arquivar, que só existe no painel).
 
 Dois formatos de time são lidos:
   * agentes avulsos (ferramenta Agent): <sessao>/subagents/agent-<id>.jsonl
@@ -1385,12 +1386,15 @@ def varrer():
         avisos.append(f"planos: arquivo em formato inesperado (detalhe técnico: {type(erro).__name__}: {erro})")
         planos = []
 
+    arquivados = ler_arquivados()
     lista = []
     for nome in projetos:
         seus = [t for t in recentes if t["projeto"] == nome]
         planos_ativos = [p for p in planos if p["projeto"] == nome and p["situacao"] == "em andamento"]
         lista.append({
             "nome": nome,
+            "arquivado": nome in arquivados,
+            "arquivado_em": arquivados.get(nome),
             "times_recentes": len(seus),
             "algum_time": nome in com_algum_time,
             "trabalhando": any(t["situacao"] == "trabalhando" for t in seus),
@@ -1426,6 +1430,42 @@ def estado():
         return _estado["dados"]
 
 
+# ---------------------------------------------------------------- projetos arquivados
+
+# Arquivar é só do painel: esconde o projeto da lista principal. A pasta do projeto não muda.
+ARQUIVO_ARQUIVADOS = PASTA_PAINEL / "arquivados.json"
+_arquivados_lock = threading.Lock()
+
+
+def ler_arquivados():
+    """{nome do projeto: momento em que foi arquivado (epoch)}."""
+    dados = ler_json(ARQUIVO_ARQUIVADOS)
+    projetos = dados.get("projetos") if isinstance(dados, dict) else None
+    if not isinstance(projetos, dict):
+        return {}
+    return {str(k): v for k, v in projetos.items() if isinstance(v, (int, float))}
+
+
+def mudar_arquivado(nome, arquivar):
+    if nome not in listar_projetos():
+        raise ValueError("projeto não existe na workspace")
+    with _arquivados_lock:
+        atual = ler_arquivados()
+        if ARQUIVO_ARQUIVADOS.exists() and not isinstance(ler_json(ARQUIVO_ARQUIVADOS), dict):
+            # arquivo estragado (editado à mão, por exemplo): guarda uma cópia antes de regravar
+            shutil.copyfile(ARQUIVO_ARQUIVADOS, ARQUIVO_ARQUIVADOS.with_name(
+                f"arquivados.json.bak-{datetime.now().strftime('%Y%m%d-%H%M%S')}"))
+        if arquivar:
+            atual.setdefault(nome, time.time())
+        else:
+            atual.pop(nome, None)
+        temporario = ARQUIVO_ARQUIVADOS.with_suffix(".tmp")
+        temporario.write_text(json.dumps({"projetos": atual}, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(temporario, ARQUIVO_ARQUIVADOS)  # troca atômica: nunca fica um arquivo pela metade
+    with _estado_lock:
+        _estado["dados"] = None  # a próxima leitura já mostra a mudança
+
+
 # ---------------------------------------------------------------- servidor
 
 # Arquivos do app instalável (PWA), servidos só por esta lista fechada.
@@ -1442,11 +1482,57 @@ ESTATICOS = {
 
 
 class Tratador(BaseHTTPRequestHandler):
-    def do_GET(self):
+    def _host_ok(self):
         # Só atende pedidos endereçados a esta máquina (protege contra DNS rebinding).
         host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]").lower()
         if host not in ("127.0.0.1", "localhost"):
             self._responder(403, "text/plain; charset=utf-8", "acesso recusado".encode("utf-8"))
+            return False
+        return True
+
+    def do_POST(self):
+        """Única escrita do painel: arquivar ou desarquivar um projeto (arquivados.json)."""
+        if not self._host_ok():
+            return
+        # Só a própria página do painel pode gravar: a origem tem de ser este servidor e o corpo,
+        # JSON. Um site de fora não consegue enviar JSON para cá sem uma pré-checagem (CORS) que
+        # este servidor nunca aprova.
+        porta = self.server.server_address[1]
+        origem = self.headers.get("Origin") or ""
+        origens_ok = {f"http://127.0.0.1:{porta}", f"http://localhost:{porta}"}
+        tipo = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        if origem not in origens_ok or tipo != "application/json":
+            self._responder(403, "application/json; charset=utf-8", b'{"erro": "origem recusada"}')
+            return
+        if urlparse(self.path).path != "/api/arquivar":
+            self._responder(404, "application/json; charset=utf-8", b'{"erro": "nao encontrado"}')
+            return
+        self.connection.settimeout(5)  # um pedido que nunca termina não prende o servidor
+        try:
+            tamanho = int(self.headers.get("Content-Length") or 0)
+            if not 0 < tamanho <= 4096:
+                raise ValueError("pedido vazio ou grande demais")
+            try:
+                pedido = json.loads(self.rfile.read(tamanho).decode("utf-8"))
+            except ValueError:  # inclui JSON inválido e UTF-8 inválido
+                raise ValueError("pedido em formato inválido") from None
+            if not isinstance(pedido, dict) or not isinstance(pedido.get("projeto"), str) \
+                    or not isinstance(pedido.get("arquivar"), bool):
+                raise ValueError("pedido em formato inválido")
+            mudar_arquivado(pedido["projeto"], pedido["arquivar"])
+        except ValueError as erro:
+            corpo = json.dumps({"erro": str(erro)}, ensure_ascii=False).encode("utf-8")
+            self._responder(400, "application/json; charset=utf-8", corpo)
+            return
+        except OSError:
+            corpo = json.dumps({"erro": "não foi possível ler o pedido ou gravar a lista de arquivados"},
+                               ensure_ascii=False).encode("utf-8")
+            self._responder(400, "application/json; charset=utf-8", corpo)
+            return
+        self._responder(200, "application/json; charset=utf-8", b'{"ok": true}')
+
+    def do_GET(self):
+        if not self._host_ok():
             return
         caminho = urlparse(self.path).path
         if caminho in ("/", "/index.html"):

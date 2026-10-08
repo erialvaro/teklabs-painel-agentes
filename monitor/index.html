@@ -189,6 +189,17 @@
   .busca { flex: 0 1 280px; display: flex; align-items: center; gap: 8px; background: var(--cartao); border: 1px solid var(--linha); border-radius: 10px; padding: 7px 12px; color: var(--busca-icone); }
   .busca:focus-within { border-color: var(--destaque); }
   .busca input { border: 0; outline: 0; background: transparent; color: var(--texto); font: inherit; font-size: 14px; width: 100%; }
+  .link-arquivados { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--suave); border: 1px solid var(--linha); background: var(--cartao); border-radius: 10px; padding: 7px 12px; order: 3; }
+  .link-arquivados:hover { border-color: var(--destaque); color: var(--texto); }
+  .link-arquivados .cont { opacity: .6; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--linha); background: var(--cartao); color: var(--texto); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .btn:hover { border-color: var(--destaque); }
+  .btn:disabled { opacity: .6; cursor: progress; }
+  .faixa-arquivado { background: var(--plano-fundo); border: 1px solid var(--linha); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--suave); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .grade-arquivados { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .item-arquivado { background: var(--cartao); border: 1px solid var(--linha); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .item-arquivado .nome { font-size: 15px; font-weight: 600; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-arquivado .acoes { display: flex; gap: 12px; align-items: center; margin-top: 4px; font-size: 13px; }
   .vazio-tracejado { border: 1px dashed var(--tracejado); border-radius: 12px; padding: 28px; text-align: center; color: var(--suave); font-size: 14px; }
 
   /* cartões de projeto */
@@ -358,6 +369,9 @@
       <button type="button" data-filtro="ativos" aria-pressed="false">Com time<span class="cont" id="cont-ativos"></span></button>
       <button type="button" data-filtro="inativos" aria-pressed="false">Sem atividade<span class="cont" id="cont-inativos"></span></button>
     </div>
+    <a class="link-arquivados" id="link-arquivados" href="#/arquivados">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M3 5h18v4H3zM5 9v10h14V9M10 13h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Arquivados<span class="cont" id="cont-arquivados"></span></a>
     <label class="busca">
       <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input id="busca" type="search" placeholder="Buscar projeto" aria-label="Buscar projeto" autocomplete="off">
@@ -375,6 +389,7 @@ let ultimaCarga = 0;
 let filtro = "todos";       // "todos" | "ativos" | "inativos"
 let busca = "";
 let legendaAberta = false;
+let erroAcao = null;        // falha ao arquivar/desarquivar, mostrada nos avisos
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -510,7 +525,7 @@ function notaEstimativa(e) {
 // ---------- tela 1: lista ----------
 function entradasLista() {
   // um item por projeto (na ordem de dados.projetos) e, no fim, "Sem projeto identificado"
-  const itens = dados.projetos.map((p) => {
+  const itens = dados.projetos.filter((p) => !p.arquivado).map((p) => {
     const times = timesDoProjeto(p.nome);
     const plano = planosDoProjeto(p.nome).find((x) => x.situacao === "em andamento") || null;
     return { nome: p.nome, rotulo: p.nome, times, plano, algum_time: p.algum_time };
@@ -586,6 +601,40 @@ function desenharCabecalhoLista(itens) {
   document.getElementById("cont-todos").textContent = " " + itens.length;
   document.getElementById("cont-ativos").textContent = " " + ativos.length;
   document.getElementById("cont-inativos").textContent = " " + semAtividade;
+  document.getElementById("cont-arquivados").textContent = " " + dados.projetos.filter((p) => p.arquivado).length;
+}
+
+// Projeto arquivado continua medido: se tiver gente trabalhando ou esperando você, a lista avisa.
+function avisoArquivadosAtivos() {
+  const ativos = dados.projetos.filter((p) => p.arquivado && (p.aguardando || p.trabalhando));
+  if (!ativos.length) return "";
+  const nomes = ativos.map((p) => `<a href="#/projeto/${encodeURIComponent(p.nome)}">${esc(p.nome)}</a> (${p.aguardando ? "aguardando você" : "trabalhando"})`).join(", ");
+  return `<div class="aviso">${ativos.length === 1 ? "Um projeto arquivado está com atividade" : ativos.length + " projetos arquivados estão com atividade"}: ${nomes}.</div>`;
+}
+
+function botaoArquivar(nome, arquivado) {
+  return `<button type="button" class="btn" data-arquivar="${esc(nome)}" data-valor="${arquivado ? "nao" : "sim"}">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M3 5h18v4H3zM5 9v10h14V9M10 13h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    ${arquivado ? "Desarquivar" : "Arquivar"}</button>`;
+}
+
+function telaArquivados() {
+  const arquivados = dados.projetos.filter((p) => p.arquivado)
+    .sort((a, b) => (b.arquivado_em || 0) - (a.arquivado_em || 0));
+  const itens = arquivados.map((p) => {
+    const times = timesDoProjeto(p.nome);
+    const t = times.length ? timePrincipal(times) : null;
+    return `<div class="item-arquivado">
+      <span class="nome" title="${esc(p.nome)}">${esc(p.nome)}</span>
+      <span class="nota">arquivado ${p.arquivado_em ? hora(p.arquivado_em) : ""} · ${times.length ? `${times.length} ${times.length === 1 ? "time" : "times"} nos últimos 7 dias` : "nenhum time nos últimos 7 dias"}</span>
+      ${t && (t.situacao === "trabalhando" || t.situacao === "aguardando") ? `<div>${selo(t.situacao, true)}</div>` : ""}
+      <div class="acoes">${botaoArquivar(p.nome, true)}<a href="#/projeto/${encodeURIComponent(p.nome)}">Abrir projeto →</a></div>
+    </div>`;
+  }).join("");
+  return `<nav class="trocador" aria-label="Projetos"><a href="#/">← Todos os projetos</a></nav>
+    <div><div class="titulo-proj"><h1>Projetos arquivados</h1></div>
+      <div class="sub-proj">Arquivar só tira o projeto da lista principal do painel. A pasta e os arquivos do projeto não mudam, e os times dele continuam sendo medidos.</div></div>
+    ${itens ? `<div class="grade-arquivados">${itens}</div>` : `<div class="vazio-tracejado">Nenhum projeto arquivado.</div>`}`;
 }
 
 function telaLista() {
@@ -594,7 +643,7 @@ function telaLista() {
   const termo = busca.trim().toLocaleLowerCase("pt-BR");
   const visiveis = itens.filter((i) => !termo || i.rotulo.toLocaleLowerCase("pt-BR").includes(termo));
   const ativos = visiveis.filter((i) => i.ativo), inativos = visiveis.filter((i) => !i.ativo);
-  const partes = [];
+  const partes = [avisoArquivadosAtivos()];
   if (!dados.workspace_existe) partes.push(`<div class="aviso">A pasta da workspace não foi encontrada: ${esc(dados.workspace)}. Veja no README como mudar.</div>`);
   if (!visiveis.length) {
     partes.push(`<div class="vazio-tracejado">Nenhum projeto com esse nome.</div>`);
@@ -718,6 +767,9 @@ function telaProjeto(nome) {
   const titulo = nome === SEM_PROJETO ? "Sem projeto identificado" : nome;
   const times = timesDoProjeto(nome);
   const itens = entradasLista().filter((i) => i.times.length || i.nome === nome);
+  const info = dados.projetos.find((p) => p.nome === nome);
+  const arquivado = !!(info && info.arquivado);
+  if (!itens.some((i) => i.nome === nome)) itens.push({ nome, rotulo: titulo, times });  // projeto arquivado aberto
   const pilulas = itens.map((i) => {
     const sit = i.times.length ? timePrincipal(i.times).situacao : "";
     return `<a class="${i.nome === nome ? "atual" : ""}" href="#/projeto/${encodeURIComponent(i.nome)}"><i class="ponto-sit ${classePonto(sit)}"></i>${esc(i.rotulo)}</a>`;
@@ -734,9 +786,13 @@ function telaProjeto(nome) {
   const planos = planosDoProjeto(nome).map(blocoPlano).join("");
   const corpo = times.length ? times.map(cartaoTime).join("")
     : `<div class="vazio-tracejado">Nenhum time trabalhou neste projeto nos últimos 7 dias.</div>`;
-  return `<nav class="trocador" aria-label="Projetos"><a href="#/">← Todos os projetos</a>${pilulas}</nav>
-    <div><div class="titulo-proj"><h1>${esc(titulo)}</h1>${principal ? selo(principal.situacao) : ""}</div><div class="sub-proj">${sub}</div></div>
-    ${alerta}${planos}${corpo}`;
+  const podeArquivar = nome !== SEM_PROJETO && !!info;
+  const faixa = arquivado
+    ? `<div class="faixa-arquivado"><span>Este projeto está arquivado${info.arquivado_em ? " desde " + hora(info.arquivado_em) : ""}: ele não aparece na lista principal. A pasta e os arquivos não mudaram.</span>${botaoArquivar(nome, true)}</div>`
+    : "";
+  return `<nav class="trocador" aria-label="Projetos"><a href="${arquivado ? "#/arquivados" : "#/"}">← ${arquivado ? "Arquivados" : "Todos os projetos"}</a>${pilulas}</nav>
+    <div><div class="titulo-proj"><h1>${esc(titulo)}</h1>${principal ? selo(principal.situacao) : ""}<span class="espaco"></span>${podeArquivar && !arquivado ? botaoArquivar(nome, false) : ""}</div><div class="sub-proj">${sub}</div></div>
+    ${faixa}${alerta}${planos}${corpo}`;
 }
 
 // ---------- ciclo ----------
@@ -744,16 +800,18 @@ function desenhar() {
   const alvo = document.getElementById("conteudo");
   const avisosEl = document.getElementById("avisos");
   const m = location.hash.match(/^#\/projeto\/(.+)$/);
-  document.getElementById("filtros").hidden = !!m || !dados;
-  if (m || !dados) document.getElementById("cab-lista").innerHTML = "";
+  const naArquivados = location.hash === "#/arquivados";
+  document.getElementById("filtros").hidden = !!m || naArquivados || !dados;
+  if (m || naArquivados || !dados) document.getElementById("cab-lista").innerHTML = "";
   if (!dados) { avisosEl.innerHTML = ""; alvo.innerHTML = erro ? `<div class="aviso">${esc(erro)}</div>` : ""; return; }
   const falha = erro ? `<div class="aviso">A última atualização falhou (${esc(erro)}). Mostrando os dados de ${haQuantoLocal(ultimaCarga)}.</div>` : "";
   const avisos = (dados.avisos || []).length
     ? `<div class="aviso">${dados.avisos.length === 1 ? "Um item não pôde ser lido e ficou de fora" : dados.avisos.length + " itens não puderam ser lidos e ficaram de fora"}: ${dados.avisos.map(esc).join("; ")}</div>`
     : "";
   const avisoPorta = dados.aviso_porta ? `<div class="aviso">${esc(dados.aviso_porta)}</div>` : "";
-  avisosEl.innerHTML = falha + avisoPorta + avisos;
-  alvo.innerHTML = m ? telaProjeto(decodeURIComponent(m[1])) : telaLista();
+  const falhaAcao = erroAcao ? `<div class="aviso">Não foi possível arquivar ou desarquivar: ${esc(erroAcao)}</div>` : "";
+  avisosEl.innerHTML = falha + falhaAcao + avisoPorta + avisos;
+  alvo.innerHTML = m ? telaProjeto(decodeURIComponent(m[1])) : naArquivados ? telaArquivados() : telaLista();
 }
 
 function haQuantoLocal(ms) {
@@ -802,6 +860,27 @@ document.querySelectorAll(".segmentado button").forEach((b) => b.addEventListene
   if (dados) desenhar();
 }));
 document.getElementById("busca").addEventListener("input", (ev) => { busca = ev.target.value; if (dados) desenhar(); });
+
+// Arquivar/desarquivar: única ação que grava algo (arquivados.json, só do painel).
+document.addEventListener("click", async (ev) => {
+  const botao = ev.target.closest("[data-arquivar]");
+  if (!botao) return;
+  ev.preventDefault();
+  botao.disabled = true;
+  try {
+    const r = await fetch("/api/arquivar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projeto: botao.dataset.arquivar, arquivar: botao.dataset.valor === "sim" }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.erro || "erro " + r.status);
+    erroAcao = null;
+  } catch (e) {
+    erroAcao = e.message || String(e);
+  }
+  await carregar();
+});
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js").catch(() => {});  // sem service worker o painel funciona igual, só não instala
