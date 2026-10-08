@@ -70,4 +70,5 @@ informado pelo gerente ou estimado), Codex, tokens e planos.
 
 ---
 
-© 2026 TekLabs Digital. Todos os direitos reservados.
+Licença [MIT](LICENSE): uso, cópia e modificação livres, mantendo o aviso de autoria.
+© 2026 Erick Álvaro da Silva · TekLabs Digital.
