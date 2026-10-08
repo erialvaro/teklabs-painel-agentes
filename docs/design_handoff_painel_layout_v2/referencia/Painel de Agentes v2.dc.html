@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Painel de Agentes · TekLabs Digital</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6f9;color:#1b1f24;font:15px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif}
+a{color:#2563eb;text-decoration:none}
+a:hover{text-decoration:underline}
+input::placeholder{color:#8a939e}
+@keyframes pulso{from{transform:scale(.5);opacity:.9}to{transform:scale(1.8);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column">
+
+  <header style="position:sticky;top:0;z-index:5;background:#0b1f3a;color:#dbe4f0;box-shadow:0 1px 0 rgba(255,255,255,.06)">
+    <div style="max-width:1240px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <button onClick="{{ abrirGeral }}" style="display:flex;align-items:center;gap:12px;border:0;background:none;padding:0;cursor:pointer;text-align:left;font:inherit;color:inherit">
+        <sc-if value="{{ marcaHub }}" hint-placeholder-val="{{ true }}">
+          <svg width="38" height="38" viewBox="0 0 40 40" style="flex:none;display:block"><defs><linearGradient id="ghub" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b7cff"></stop><stop offset="1" stop-color="#a78bfa"></stop></linearGradient></defs><rect x=".5" y=".5" width="39" height="39" rx="10" fill="#132b4d" stroke="rgba(255,255,255,.16)"></rect><g stroke="#22d3ee" stroke-width="1.6" stroke-opacity=".7"><line x1="20" y1="20" x2="20" y2="9"></line><line x1="20" y1="20" x2="10.5" y2="25.5"></line><line x1="20" y1="20" x2="29.5" y2="25.5"></line></g><circle cx="20" cy="20" r="6.2" fill="url(#ghub)"></circle><circle cx="20" cy="9" r="3.1" fill="#22d3ee"></circle><circle cx="10.5" cy="25.5" r="3.1" fill="#e2e8f0"></circle><circle cx="29.5" cy="25.5" r="3.1" fill="#e2e8f0"></circle></svg>
+        </sc-if>
+        <sc-if value="{{ marcaPulso }}" hint-placeholder-val="{{ false }}">
+          <svg width="38" height="38" viewBox="0 0 40 40" style="flex:none;display:block"><rect x=".5" y=".5" width="39" height="39" rx="10" fill="#132b4d" stroke="rgba(255,255,255,.16)"></rect><rect x="9" y="20" width="5.5" height="11" rx="2.75" fill="#5b7cff"></rect><rect x="17.25" y="10" width="5.5" height="21" rx="2.75" fill="#22d3ee"></rect><rect x="25.5" y="15" width="5.5" height="16" rx="2.75" fill="#a78bfa"></rect></svg>
+        </sc-if>
+        <sc-if value="{{ marcaAtual }}" hint-placeholder-val="{{ false }}"><img src="assets/icone.svg" alt="" width="38" height="38" style="display:block;flex:none"></sc-if>
+        <span style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-weight:700;color:#fff;font-size:16px;line-height:1.1;letter-spacing:-.01em;white-space:nowrap">Painel de Agentes</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#8fa3bd;line-height:1;white-space:nowrap">por <img src="assets/logo-teklabs.svg" alt="teklabs" width="47" height="17" style="display:block"> Open Source Software &amp; AI</span>
+        </span>
+      </button>
+
+      <div style="flex:1"></div>
+
+      <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;position:relative">
+        <span style="display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 12px;white-space:nowrap;color:#dbe4f0"><span style="position:relative;width:7px;height:7px;border-radius:50%;background:#4ade80"><span style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #4ade80;animation:pulso 1.6s ease-out infinite"></span></span>atualizado há {{ segs }} s</span>
+        <button onClick="{{ alternarLegenda }}" style="display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.14);background:{{ legendaBg }};border-radius:999px;padding:5px 12px;font:inherit;font-size:12.5px;color:#dbe4f0;cursor:pointer" style-hover="border-color:rgba(255,255,255,.35)">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.5"></circle><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.8.6-.8 1.2M8 11.6v.2"></path></svg>Legenda
+        </button>
+        <sc-if value="{{ legendaAberta }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:calc(100% + 10px);right:0;width:340px;background:#fff;border:1px solid #e2e5ea;border-radius:12px;box-shadow:0 14px 36px rgba(11,31,58,.22);padding:14px 16px;display:flex;flex-direction:column;gap:10px;color:#1b1f24;font-size:13px">
+            <span style="display:flex;gap:10px;align-items:center"><i style="width:26px;height:9px;border-radius:5px;background:#2563eb;flex:none"></i><span><b>Medido:</b> lido dos arquivos agora</span></span>
+            <span style="display:flex;gap:10px;align-items:center"><i style="width:26px;height:9px;border-radius:5px;border:1px solid #7c3aed;background:repeating-linear-gradient(135deg,#7c3aed 0 4px,transparent 4px 8px);flex:none"></i><span><b>Estimativa:</b> cálculo aproximado, pode mudar</span></span>
+            <span style="display:flex;gap:10px;align-items:center"><i style="width:26px;height:9px;border-radius:5px;border:1px solid #5c6570;background:#eef0f3;flex:none"></i><span><b>Informado pelo gerente:</b> situação das fases no plano</span></span>
+            <span style="display:flex;gap:10px;align-items:center"><span style="width:26px;display:flex;justify-content:center;flex:none"><span style="width:8px;height:8px;border-radius:50%;background:#16a34a"></span></span><span><b>Trabalhando:</b> escreveu nos últimos 90 segundos</span></span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;padding-left:16px;border-left:1px solid rgba(255,255,255,.12)">
+        <span style="width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#5b7cff,#a78bfa);color:#fff;font-weight:700;font-size:12.5px">EA</span>
+        <span style="display:flex;flex-direction:column;line-height:1.2">
+          <span style="font-size:10px;color:#7088a6;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Criado por</span>
+          <a href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:#fff;font-weight:600;white-space:nowrap">Erick Álvaro da Silva</a>
+        </span>
+        <a href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer" title="LinkedIn de Erick Álvaro da Silva" aria-label="LinkedIn de Erick Álvaro da Silva" style="width:30px;height:30px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(112,181,249,.14);color:#70b5f9" style-hover="background:rgba(112,181,249,.26)"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:1240px;width:100%;margin:0 auto;padding:28px 32px 56px;display:flex;flex-direction:column;gap:22px">
+
+    <sc-if value="{{ semSel }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div style="min-width:0;flex:1 1 360px">
+          <h1 style="margin:0;font-size:26px;line-height:1.2;letter-spacing:-.01em">Painel dos times de agentes</h1>
+          <div style="color:#5c6570;font-size:12.5px;margin-top:6px;font-family:ui-monospace,Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">C:\Users\voce\workspace</div>
+        </div>
+        <div style="display:flex;background:#fff;border:1px solid #e2e5ea;border-radius:12px;overflow:hidden">
+          <div style="padding:10px 18px;border-right:1px solid #eef0f3"><div style="font-size:22px;font-weight:600;color:#15803d;font-variant-numeric:tabular-nums;line-height:1.2">{{ nTrabalhando }}</div><div style="font-size:12px;color:#5c6570;white-space:nowrap">trabalhando</div></div>
+          <div style="padding:10px 18px;border-right:1px solid #eef0f3"><div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2">{{ nAgentesAtivos }}</div><div style="font-size:12px;color:#5c6570;white-space:nowrap">agentes ativos agora</div></div>
+          <div style="padding:10px 18px"><div style="font-size:22px;font-weight:600;color:#5c6570;font-variant-numeric:tabular-nums;line-height:1.2">{{ nInativos }}</div><div style="font-size:12px;color:#5c6570;white-space:nowrap">sem atividade</div></div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;background:#e9ecf1;border-radius:10px;padding:3px;gap:2px">
+          <sc-for list="{{ filtros }}" as="fl" hint-placeholder-count="3">
+            <button onClick="{{ fl.escolher }}" style="border:0;font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;background:{{ fl.bg }};color:{{ fl.fg }};font-weight:{{ fl.peso }};box-shadow:{{ fl.sombra }}">{{ fl.t }} <span style="opacity:.6;font-variant-numeric:tabular-nums">{{ fl.n }}</span></button>
+          </sc-for>
+        </div>
+        <label style="flex:0 1 280px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e5ea;border-radius:10px;padding:7px 12px" style-focus-within="border-color:#2563eb">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#8a939e" stroke-width="1.6"><circle cx="7" cy="7" r="5"></circle><path d="M11 11l3.5 3.5"></path></svg>
+          <input value="{{ q }}" onChange="{{ buscar }}" placeholder="Buscar projeto" style="flex:1;min-width:0;background:none;border:0;outline:none;font:inherit;font-size:13.5px;color:#1b1f24"></input>
+        </label>
+      </div>
+
+      <sc-if value="{{ mostraAtivos }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px">
+          <sc-for list="{{ cartoes }}" as="c" hint-placeholder-count="2">
+            <button onClick="{{ c.abrir }}" style="display:flex;flex-direction:column;gap:14px;text-align:left;font:inherit;color:inherit;cursor:pointer;background:#fff;border:1px solid #e2e5ea;border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(11,31,58,.04);transition:border-color .15s,box-shadow .15s" style-hover="border-color:#9db8f5;box-shadow:0 8px 24px rgba(11,31,58,.08)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;width:100%">
+                <div style="min-width:0">
+                  <div style="font-weight:700;font-size:17px;line-height:1.25">{{ c.nome }}</div>
+                  <div style="font-size:13px;color:#5c6570;margin-top:2px">{{ c.sub }}</div>
+                </div>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;flex:none;background:{{ c.st.bg }};color:{{ c.st.fg }}">
+                  <sc-if value="{{ c.st.live }}" hint-placeholder-val="{{ false }}"><span style="position:relative;width:7px;height:7px;border-radius:50%;background:#16a34a"><span style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #16a34a;animation:pulso 1.6s ease-out infinite"></span></span></sc-if>{{ c.st.t }}
+                </span>
+              </div>
+              <sc-if value="{{ c.temPlano }}" hint-placeholder-val="{{ false }}">
+                <div style="width:100%;background:#f1f3f6;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5c6570">Plano · informado pelo gerente</div>
+                  <div style="font-size:14px;line-height:1.4;text-wrap:pretty">{{ c.plano.demanda }}</div>
+                  <div style="display:flex;gap:4px"><sc-for list="{{ c.plano.segs }}" as="s" hint-placeholder-count="4"><span style="flex:1;height:5px;border-radius:3px;background:{{ s.cor }}"></span></sc-for></div>
+                  <div style="font-size:12.5px;color:#5c6570">{{ c.plano.resumo }}</div>
+                </div>
+              </sc-if>
+              <div style="width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px">
+                <span style="color:#5c6570">Gerente</span>
+                <span style="font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:{{ c.gerente.st.bg }};color:{{ c.gerente.st.fg }}">{{ c.gerente.st.t }}</span>
+                <span style="font-size:12px;color:#5c6570">{{ c.gerente.linha }}</span>
+              </div>
+              <div style="width:100%;border-top:1px solid #eef0f3;padding-top:12px;display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2563eb">Medido</span>
+                <div style="display:flex;gap:22px;flex-wrap:wrap">
+                  <sc-for list="{{ c.nums }}" as="n" hint-placeholder-count="3">
+                    <div><div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2;color:{{ n.cor }}">{{ n.v }}</div><div style="font-size:12px;color:#5c6570;white-space:nowrap">{{ n.l }}</div></div>
+                  </sc-for>
+                </div>
+                <div style="height:6px;border-radius:3px;background:#e5e8ec;overflow:hidden"><i style="display:block;height:100%;background:#2563eb;width:{{ c.medPct }}"></i></div>
+              </div>
+              <sc-if value="{{ c.temEst }}" hint-placeholder-val="{{ false }}">
+                <div style="width:100%;background:#f7f4fe;border:1px dashed #a78bfa;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:baseline;gap:6px 10px;flex-wrap:wrap;font-size:13px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7c3aed">Estimativa</span><b>{{ c.est.pct }}% concluído</b><span>{{ c.est.falta }}</span><span style="color:#5c6570">cerca de {{ c.est.total }} agentes no total</span></div>
+                  <div style="height:6px;border-radius:3px;background:#ebe5fb;overflow:hidden"><i style="display:block;height:100%;width:{{ c.estPct }};background:repeating-linear-gradient(135deg,#7c3aed 0 5px,#b99cf2 5px 10px)"></i></div>
+                </div>
+              </sc-if>
+              <div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;color:#5c6570">
+                <span>{{ c.outros }}</span>
+                <span style="color:#2563eb;font-weight:600;white-space:nowrap">Abrir projeto →</span>
+              </div>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ mostraInativos }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:15px">Sem atividade</h2><span style="font-size:13px;color:#5c6570">nenhum time nos últimos 7 dias</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+            <sc-for list="{{ inativos }}" as="r" hint-placeholder-count="8">
+              <button onClick="{{ r.abrir }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;font:inherit;color:inherit;cursor:pointer;background:#fafbfc;border:1px solid #e8ebef;border-radius:10px;padding:10px 14px" style-hover="background:#fff;border-color:#c9d3e0">
+                <span style="font-size:14px;font-weight:600;color:#3a424c;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.nome }}</span>
+                <span style="font-size:12px;color:#7a838e">{{ r.sub }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vazioBusca }}" hint-placeholder-val="{{ false }}"><div style="padding:28px;text-align:center;color:#5c6570;font-size:14px;border:1px dashed #d4d8de;border-radius:12px">Nenhum projeto com esse nome.</div></sc-if>
+      <div style="font-size:12px;color:#5c6570">Atualiza sozinho a cada 5 segundos. O painel só lê arquivos e não interfere nos agentes.</div>
+    </sc-if>
+
+    <sc-if value="{{ temSel }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:8px;overflow-x:auto;padding-bottom:2px">
+        <button onClick="{{ abrirGeral }}" style="flex:none;border:1px solid #e2e5ea;background:#fff;border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;color:#1b1f24;cursor:pointer" style-hover="border-color:#2563eb">← Todos os projetos</button>
+        <sc-for list="{{ trocar }}" as="tr" hint-placeholder-count="2">
+          <button onClick="{{ tr.abrir }}" style="flex:none;display:flex;align-items:center;gap:7px;border:1px solid {{ tr.borda }};background:{{ tr.bg }};border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;color:{{ tr.fg }};cursor:pointer;font-weight:{{ tr.peso }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ tr.dot }}"></span>{{ tr.nome }}</button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <h1 style="margin:0;font-size:28px;line-height:1.2;letter-spacing:-.01em">{{ p.nome }}</h1>
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:{{ p.st.bg }};color:{{ p.st.fg }}">{{ p.st.t }}</span>
+        </div>
+        <div style="font-size:13px;color:#5c6570">{{ p.meta }}</div>
+      </div>
+
+      <sc-if value="{{ p.alerta }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:12px;align-items:center;background:#fef3c7;color:#92400e;border-radius:10px;padding:12px 16px;font-size:14px">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="flex:none"><circle cx="10" cy="10" r="8"></circle><path d="M10 6v5M10 14v.5"></path></svg><span>{{ p.alerta }}</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p.temPlano }}" hint-placeholder-val="{{ false }}">
+        <section style="background:#fff;border:1px solid #e2e5ea;border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+            <div style="min-width:0;flex:1 1 320px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5c6570">Plano · informado pelo gerente</div>
+              <h2 style="margin:2px 0 0;font-size:18px;line-height:1.35;text-wrap:pretty">{{ p.plano.demanda }}</h2>
+              <div style="font-size:12.5px;color:#5c6570;margin-top:4px">Criado {{ p.plano.criado }} · atualizado {{ p.plano.atualizado }} · {{ p.plano.arquivo }}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2">{{ p.plano.aprovadas }}<span style="color:#a0a8b2;font-weight:400"> / {{ p.plano.total }}</span></div>
+              <div style="font-size:12px;color:#5c6570">fases aprovadas pelo QA</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+            <sc-for list="{{ p.plano.fases }}" as="f" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:4px;padding-top:10px;border-top:3px solid {{ f.barra }}">
+                <div style="display:flex;align-items:baseline;gap:6px"><b style="font-size:13px;color:{{ f.cor }}">{{ f.id }}</b><span style="font-size:14px;font-weight:600">{{ f.titulo }}</span></div>
+                <div style="font-size:12.5px;color:{{ f.cor }}">{{ f.sit }}</div>
+                <div style="font-size:12px;color:#5c6570">{{ f.agentes }} · QA {{ f.qa }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#f7f4fe;border:1px dashed #a78bfa;border-radius:8px;padding:9px 12px;font-size:13px;flex-wrap:wrap">
+            <b style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#7c3aed">Estimativa</b><span>{{ p.plano.est }}</span>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-for list="{{ p.times }}" as="t" hint-placeholder-count="1">
+        <section style="background:#fff;border:1px solid #e2e5ea;border-radius:14px;overflow:hidden">
+          <div style="padding:18px 22px 16px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid #eef0f3">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <h2 style="margin:0;font-size:18px">{{ t.nome }}</h2>
+              <span style="font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:{{ t.st.bg }};color:{{ t.st.fg }}">{{ t.st.t }}</span>
+              <span style="font-size:12px;border:1px solid #e2e5ea;border-radius:6px;padding:1px 7px;color:#5c6570">{{ t.tipo }}</span>
+            </div>
+            <div style="font-size:12.5px;color:#5c6570">Começou {{ t.inicio }} · última escrita {{ t.ultima }} · projeto identificado por {{ t.criterio }}</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;margin-top:4px">
+              <span style="color:#5c6570">Gerente</span>
+              <span style="font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:{{ t.gerente.st.bg }};color:{{ t.gerente.st.fg }}">{{ t.gerente.st.t }}</span>
+              <span style="font-size:12px;color:#5c6570">{{ t.gerente.linha }}</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));border-bottom:1px solid #eef0f3">
+            <div style="padding:16px 22px;border-right:1px solid #eef0f3;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2563eb">Medido</div>
+              <div style="display:flex;gap:22px;flex-wrap:wrap">
+                <sc-for list="{{ t.nums }}" as="n" hint-placeholder-count="3">
+                  <div><div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2;color:{{ n.cor }}">{{ n.v }}</div><div style="font-size:12px;color:#5c6570;white-space:nowrap">{{ n.l }}</div></div>
+                </sc-for>
+              </div>
+              <div style="height:6px;border-radius:3px;background:#e5e8ec;overflow:hidden"><i style="display:block;height:100%;background:#2563eb;width:{{ t.medPct }}"></i></div>
+              <div style="font-size:12px;color:#5c6570">rodando há {{ t.rodando }}</div>
+            </div>
+            <div style="padding:16px 22px;border-right:1px solid #eef0f3;display:flex;flex-direction:column;gap:8px;background:#fbf9ff">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7c3aed">Estimativa</div>
+              <div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25">{{ t.estTitulo }}</div>
+              <sc-if value="{{ t.temEst }}" hint-placeholder-val="{{ true }}"><div style="height:6px;border-radius:3px;background:#ebe5fb;overflow:hidden"><i style="display:block;height:100%;width:{{ t.estPct }};background:repeating-linear-gradient(135deg,#7c3aed 0 5px,#b99cf2 5px 10px)"></i></div></sc-if>
+              <div style="font-size:12px;color:#5c6570;text-wrap:pretty">{{ t.estNota }}</div>
+            </div>
+            <div style="padding:16px 22px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5c6570">Tokens (equiv.)</div>
+              <div style="display:flex;gap:22px;flex-wrap:wrap">
+                <div><div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2">{{ t.tokAgentes }}</div><div style="font-size:12px;color:#5c6570">agentes</div></div>
+                <div><div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2">{{ t.tokGerente }}</div><div style="font-size:12px;color:#5c6570">conversa do gerente</div></div>
+              </div>
+            </div>
+          </div>
+          <sc-if value="{{ t.temFases }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 22px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #eef0f3">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2563eb;margin-right:6px">Fases</span>
+              <sc-for list="{{ t.fases }}" as="fc" hint-placeholder-count="3">
+                <span style="font-size:13px;padding:3px 10px;border-radius:999px;background:{{ fc.bg }};color:{{ fc.fg }};border:{{ fc.borda }};font-weight:{{ fc.peso }}">{{ fc.t }} <small style="opacity:.75;font-weight:400">{{ fc.ag }}</small></span>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+              <thead>
+                <tr style="background:#fafbfc">
+                  <th style="text-align:left;padding:9px 22px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Agente</th>
+                  <th style="text-align:left;padding:9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Fase</th>
+                  <th style="text-align:left;padding:9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Situação</th>
+                  <th style="text-align:right;padding:9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Começou</th>
+                  <th style="text-align:right;padding:9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Tempo</th>
+                  <th style="text-align:right;padding:9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Última escrita</th>
+                  <th style="text-align:right;padding:9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Escreveu</th>
+                  <th style="text-align:right;padding:9px 22px 9px 10px;font-size:12px;color:#5c6570;font-weight:600;border-bottom:1px solid #e2e5ea">Tokens</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ t.agentes }}" as="a" hint-placeholder-count="4">
+                  <tr style-hover="background:#fafbfc">
+                    <td style="padding:9px 22px;border-bottom:1px solid #eef0f3;font-weight:500">{{ a.nome }}</td>
+                    <td style="padding:9px 10px;border-bottom:1px solid #eef0f3;color:#5c6570">{{ a.fase }}</td>
+                    <td style="padding:9px 10px;border-bottom:1px solid #eef0f3"><span style="display:inline-flex;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;background:{{ a.st.bg }};color:{{ a.st.fg }}">{{ a.st.t }}</span></td>
+                    <td style="padding:9px 10px;border-bottom:1px solid #eef0f3;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ a.comecou }}</td>
+                    <td style="padding:9px 10px;border-bottom:1px solid #eef0f3;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ a.tempo }}</td>
+                    <td style="padding:9px 10px;border-bottom:1px solid #eef0f3;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ a.ultima }}</td>
+                    <td style="padding:9px 10px;border-bottom:1px solid #eef0f3;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ a.escreveu }}</td>
+                    <td style="padding:9px 22px 9px 10px;border-bottom:1px solid #eef0f3;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ a.tokens }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </sc-for>
+
+      <sc-if value="{{ p.semTimes }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #d4d8de;border-radius:12px;padding:32px;text-align:center;color:#5c6570;font-size:14px">Nenhum time trabalhou neste projeto nos últimos 7 dias.</div>
+      </sc-if>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;marca&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;rede&quot;,&quot;barras&quot;,&quot;atual&quot;],&quot;default&quot;:&quot;rede&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const ST = {
+  trabalhando: { t: 'trabalhando', bg: '#dcfce7', fg: '#15803d', dot: '#16a34a', live: true },
+  aguardando: { t: 'aguardando você', bg: '#fef3c7', fg: '#b45309', dot: '#f59e0b' },
+  ocioso: { t: 'ocioso, aguardando você', bg: '#eef0f3', fg: '#5c6570', dot: '#94a3b8' },
+  ocupado: { t: 'ocupado, sem escrever agora', bg: '#e8effe', fg: '#2563eb', dot: '#2563eb' },
+  andamento: { t: 'em andamento', bg: '#e8effe', fg: '#2563eb', dot: '#2563eb' },
+  concluido: { t: 'concluído', bg: '#eef0f3', fg: '#1b1f24', dot: '#94a3b8' },
+  repetido: { t: 'repetido', bg: '#eef0f3', fg: '#5c6570', dot: '#94a3b8' },
+  encerrado: { t: 'encerrado', bg: '#eef0f3', fg: '#1b1f24', dot: '#94a3b8' },
+  fila: { t: 'na fila', bg: '#eef0f3', fg: '#5c6570', dot: '#cbd5e1' },
+  inativo: { t: 'nenhum time ainda', bg: '#eef0f3', fg: '#5c6570', dot: '#cbd5e1' },
+};
+const ag = (nome, fase, sit, comecou, tempo, ultima, escreveu, tokens) => ({ nome, fase, sit, comecou, tempo, ultima, escreveu, tokens });
+
+const PROJETOS = [
+  { id: 'dados', nome: 'projeto-dados', sit: 'trabalhando', ultima: 'há 5 s', maisTimes: 32,
+    times: [{ nome: 'fase4-implementacao', tipo: 'time com roteiro', sit: 'trabalhando', inicio: '07/10 14:02', ultima: 'há 5 s', criterio: 'caminho citado no roteiro',
+      gerente: { sit: 'ocupado', sessao: 'workspace-dev-35', ultima: 'há 22 min' },
+      lancados: 40, concluidos: 19, trabalhando: 2, repetidos: 2, rodando: '21 h 30 min', tokAgentes: '18 mi', tokGerente: '6,4 mi',
+      est: { pct: 48, falta: 'faltam cerca de 23 h 12 min', total: 40, media: '3,5', restam: 0 },
+      fases: [{ t: 'Preparação', e: 'feita', ag: 6 }, { t: 'Backend', e: 'feita', ag: 14 }, { t: 'Frontend', e: 'atual', ag: 16 }, { t: 'Integração', e: 'futura', ag: 4 }],
+      agentes: [
+        ag('Especialista API laudos', 'Backend', 'concluido', '07/10 15:10', '1 h 4 min', 'há 18 h', '1,2 MB', '820 mil'),
+        ag('Especialista migrações', 'Backend', 'repetido', '07/10 15:40', '22 min', 'há 17 h', '402 KB', '260 mil'),
+        ag('Especialista telas de caso', 'Frontend', 'trabalhando', '08/10 09:12', '1 h 18 min', 'há 5 s', '960 KB', '710 mil'),
+        ag('Especialista formulários', 'Frontend', 'trabalhando', '08/10 09:40', '50 min', 'há 31 s', '540 KB', '402 mil'),
+        ag('Especialista testes e2e', 'Frontend', 'andamento', '08/10 09:55', '35 min', 'há 4 min', '220 KB', '150 mil'),
+        ag('Especialista integração SSO', 'Integração', 'fila', 'sem dado', 'sem dado', 'sem dado', 'nada ainda', 'sem dado') ] }] },
+  { id: 'painel', nome: 'teklabs-painel-agentes', sit: 'encerrado', ultima: 'há 17 h 7 min', desc: 'Painel local de monitoramento de times e agentes',
+    plano: { demanda: 'Painel de agentes como produto TekLabs Digital: assinatura, PWA, instaladores e GitHub', aprovadas: 3, total: 4, agora: 'F4 em andamento',
+      criado: '06/10 10:20', atualizado: 'há 13 min', arquivo: 'planos/painel-produto.json',
+      est: 'faltam cerca de 9 h · cerca de 14 agentes no total, pelo ritmo das fases já aprovadas',
+      fases: [
+        { id: 'F1', titulo: 'Assinatura e marca', sit: 'aprovada', agentes: 3, qa: 'aprovado' },
+        { id: 'F2', titulo: 'PWA', sit: 'aprovada', agentes: 3, qa: 'aprovado' },
+        { id: 'F3', titulo: 'Instaladores', sit: 'aprovada', agentes: 5, qa: 'aprovado' },
+        { id: 'F4', titulo: 'Publicação no GitHub', sit: 'em andamento', agentes: 0, qa: 'ainda não chamado' } ] },
+    times: [{ nome: 'Painel como produto', tipo: 'agentes avulsos', sit: 'encerrado', inicio: '06/10 10:24', ultima: 'há 17 h 7 min', criterio: 'pasta de trabalho dos agentes',
+      gerente: { sit: 'ocioso', sessao: 'workspace-dev-46', ultima: 'há 13 min' },
+      lancados: 11, concluidos: 11, trabalhando: 0, repetidos: 0, rodando: '6 h 40 min', tokAgentes: '4,1 mi', tokGerente: '2,9 mi', est: null, fases: [],
+      agentes: [
+        ag('F1.1 Especialista marca', 'F1', 'concluido', '06/10 10:24', '18 min', 'há 2 dias', '210 KB', '180 mil'),
+        ag('F2.1 Especialista PWA', 'F2', 'concluido', '06/10 12:02', '34 min', 'há 2 dias', '380 KB', '320 mil'),
+        ag('F3.1 Instalador Windows', 'F3', 'concluido', '07/10 09:10', '41 min', 'há 23 h', '460 KB', '402 mil'),
+        ag('F3.2 Instalador macOS e Linux', 'F3', 'concluido', '07/10 09:12', '38 min', 'há 23 h', '410 KB', '366 mil'),
+        ag('QA F3', 'F3', 'concluido', '07/10 15:40', '12 min', 'há 17 h', '120 KB', '96 mil') ] }] },
+];
+['app-web', 'deploy-modelo', 'diagrama db', 'entregas', 'entregas-cliente', 'modelo-dados', 'arquivo-antigo', 'estudos', 'estudos-2', 'pipeline-dados']
+  .forEach((nome, i) => PROJETOS.push({ id: 'i' + i, nome, sit: 'inativo', times: [] }));
+PROJETOS.push({ id: 'sem', nome: 'Sem projeto identificado', sit: 'inativo', times: [], sub: '2 times fora das pastas da workspace' });
+
+const FASE_PLANO = {
+  'aprovada': { barra: '#15803d', cor: '#15803d', txt: '✓ aprovada' },
+  'em QA': { barra: '#2563eb', cor: '#2563eb', txt: 'em QA' },
+  'em andamento': { barra: '#2563eb', cor: '#2563eb', txt: 'em andamento' },
+  'pendente': { barra: '#e2e5ea', cor: '#5c6570', txt: 'pendente' },
+};
+const FASE_TIME = {
+  feita: { bg: '#dcfce7', fg: '#15803d', borda: '1px solid transparent', peso: 400, pre: '✓ ' },
+  atual: { bg: '#fff', fg: '#1b1f24', borda: '2px solid #2563eb', peso: 600, pre: '' },
+  futura: { bg: '#fff', fg: '#5c6570', borda: '1px solid #e2e5ea', peso: 400, pre: '' },
+};
+const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+const nums = (t) => {
+  const r = [
+    { v: t.lancados, l: t.tipo === 'time com roteiro' ? 'agentes lançados' : 'agentes iniciados', cor: '#1b1f24' },
+    { v: t.concluidos, l: 'encerrados', cor: '#1b1f24' },
+    { v: t.trabalhando, l: 'trabalhando agora', cor: t.trabalhando ? '#15803d' : '#1b1f24' },
+  ];
+  if (t.repetidos) r.push({ v: t.repetidos, l: 'repetidos', cor: '#5c6570' });
+  return r;
+};
+const gerente = (g) => ({ st: ST[g.sit], linha: `sessão ${g.sessao} · última escrita na conversa ${g.ultima}` });
+
+class Component extends DCLogic {
+  state = { sel: null, segs: 3, legenda: false, filtro: 'todos', q: '' };
+  componentDidMount() { this.timer = setInterval(() => this.setState(s => ({ segs: s.segs >= 5 ? 0 : s.segs + 1 })), 1000); }
+  componentWillUnmount() { clearInterval(this.timer); }
+  abrir(id) { this.setState({ sel: id, legenda: false }); window.scrollTo(0, 0); }
+
+  cartao(p) {
+    const t = p.times[0];
+    const c = { nome: p.nome, st: ST[p.sit], abrir: () => this.abrir(p.id),
+      sub: (p.desc ? p.desc + ' · ' : t.nome + ' · ') + 'última escrita ' + t.ultima,
+      gerente: gerente(t.gerente), nums: nums(t),
+      medPct: Math.round(100 * t.concluidos / Math.max(1, t.lancados)) + '%',
+      temEst: !!t.est && !p.plano, est: t.est || {}, estPct: t.est ? t.est.pct + '%' : '0%',
+      temPlano: !!p.plano, outros: p.maisTimes ? `mais ${p.maisTimes} times nos últimos 7 dias` : plural(p.times.length, 'time', 'times') + ' nos últimos 7 dias' };
+    if (p.plano) c.plano = { demanda: p.plano.demanda,
+      segs: p.plano.fases.map(f => ({ cor: FASE_PLANO[f.sit].barra })),
+      resumo: `${p.plano.aprovadas} de ${p.plano.total} fases aprovadas pelo QA · agora: ${p.plano.agora}` };
+    return c;
+  }
+
+  detalhe(p) {
+    const times = p.times.map(t => ({
+      ...t, st: ST[t.sit], gerente: gerente(t.gerente), nums: nums(t),
+      medPct: Math.round(100 * t.concluidos / Math.max(1, t.lancados)) + '%',
+      temEst: !!t.est, estPct: t.est ? t.est.pct + '%' : '0%',
+      estTitulo: t.est ? `${t.est.pct}% · ${t.est.falta}` : 'Sem base para estimar',
+      estNota: t.est
+        ? `Cerca de ${t.est.total} agentes no total: média de ${t.est.media} agentes por fase concluída, vezes ${plural(t.est.restam, 'fase que falta', 'fases que faltam')}, somada aos já lançados.`
+        : (t.tipo === 'agentes avulsos' ? 'Agentes avulsos não têm fases declaradas, então não há estimativa.' : 'Nenhuma fase terminou ainda.'),
+      temFases: t.fases.length > 0,
+      fases: t.fases.map(f => ({ ...FASE_TIME[f.e], t: FASE_TIME[f.e].pre + f.t, ag: plural(f.ag, 'agente', 'agentes') })),
+      agentes: t.agentes.map(a => ({ ...a, st: ST[a.sit] })),
+    }));
+    return {
+      nome: p.nome, st: ST[p.sit], times, semTimes: !times.length,
+      meta: times.length ? `${p.desc ? p.desc + ' · ' : ''}${plural(p.maisTimes ? p.maisTimes + 1 : times.length, 'time', 'times')} nos últimos 7 dias · última escrita ${p.ultima}` : (p.sub || 'Nenhum time ainda'),
+      alerta: p.sit === 'aguardando' ? 'O gerente parou esperando você aprovar uma ação no Claude Code. O time não avança até você responder.' : '',
+      temPlano: !!p.plano,
+      plano: p.plano ? { ...p.plano, fases: p.plano.fases.map(f => ({ id: f.id, titulo: f.titulo, ...FASE_PLANO[f.sit], sit: FASE_PLANO[f.sit].txt, agentes: plural(f.agentes, 'agente', 'agentes'), qa: f.qa })) } : null,
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const marca = this.props.marca ?? 'rede';
+    const q = s.q.trim().toLowerCase();
+    const bate = p => !q || p.nome.toLowerCase().includes(q);
+    const ativos = PROJETOS.filter(p => p.times.length);
+    const inativos = PROJETOS.filter(p => !p.times.length);
+    const ativosF = ativos.filter(bate), inativosF = inativos.filter(bate);
+    const sel = PROJETOS.find(p => p.id === s.sel);
+    const mostraAtivos = s.filtro !== 'inativos' && ativosF.length > 0;
+    const mostraInativos = s.filtro !== 'ativos' && inativosF.length > 0;
+    const filtros = [['todos', 'Todos', PROJETOS.length], ['ativos', 'Com time', ativos.length], ['inativos', 'Sem atividade', inativos.length]].map(([id, t, n]) => {
+      const on = s.filtro === id;
+      return { t, n, escolher: () => this.setState({ filtro: id }), bg: on ? '#fff' : 'transparent', fg: on ? '#1b1f24' : '#5c6570', peso: on ? 600 : 400, sombra: on ? '0 1px 2px rgba(11,31,58,.12)' : 'none' };
+    });
+    return {
+      segs: s.segs,
+      marcaHub: marca === 'rede', marcaPulso: marca === 'barras', marcaAtual: marca === 'atual',
+      legendaAberta: s.legenda, legendaBg: s.legenda ? 'rgba(255,255,255,.12)' : 'transparent',
+      alternarLegenda: () => this.setState(x => ({ legenda: !x.legenda })),
+      abrirGeral: () => this.abrir(null),
+      semSel: !sel, temSel: !!sel,
+      q: s.q, buscar: e => this.setState({ q: e.target.value }),
+      filtros, mostraAtivos, mostraInativos,
+      vazioBusca: !!q && !(mostraAtivos || mostraInativos),
+      nTrabalhando: PROJETOS.filter(p => p.sit === 'trabalhando').length,
+      nAgentesAtivos: PROJETOS.reduce((a, p) => a + p.times.reduce((x, t) => x + t.trabalhando, 0), 0),
+      nInativos: inativos.length,
+      cartoes: ativosF.map(p => this.cartao(p)),
+      inativos: inativosF.map(p => ({ nome: p.nome, sub: p.sub || 'nenhum time ainda', abrir: () => this.abrir(p.id) })),
+      trocar: ativos.map(p => {
+        const on = p.id === s.sel;
+        return { nome: p.nome, dot: ST[p.sit].dot, abrir: () => this.abrir(p.id), bg: on ? '#0b1f3a' : '#fff', fg: on ? '#fff' : '#1b1f24', borda: on ? '#0b1f3a' : '#e2e5ea', peso: on ? 600 : 400 };
+      }),
+      p: sel ? this.detalhe(sel) : { nome: '', st: ST.inativo, times: [], plano: null },
+    };
+  }
+}
+</script>
+</body>
+</html>

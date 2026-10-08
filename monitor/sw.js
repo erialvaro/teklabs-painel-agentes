@@ -1,8 +1,8 @@
 // Service worker do Painel de Agentes (TekLabs Digital).
 // Guarda só a "casca" do app para ele abrir mesmo com o servidor desligado.
 // Os dados (/api/...) nunca vêm do cache: são sempre lidos ao vivo.
-const VERSAO = "painel-v2";
-const CASCA = ["/", "/manifest.webmanifest", "/icons/icone.svg", "/icons/logo-teklabs.svg",
+const VERSAO = "painel-v3";
+const CASCA = ["/", "/manifest.webmanifest", "/icons/icone.svg", "/icons/icone-rede.svg", "/icons/logo-teklabs.svg",
                "/icons/icone-192.png", "/icons/icone-512.png"];
 
 self.addEventListener("install", (e) => {

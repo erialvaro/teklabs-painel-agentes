@@ -10,3 +10,6 @@ monitor/planos/
 .env
 auth.json
 *.key
+
+# Pacotes de entrada (o conteúdo já está em docs/)
+*.zip

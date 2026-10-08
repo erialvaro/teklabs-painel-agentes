@@ -28,7 +28,8 @@ RAIZ = Path(__file__).resolve().parent
 SISTEMA = platform.system()  # Windows, Darwin ou Linux
 CARIMBO = datetime.now().strftime("%Y%m%d-%H%M%S")
 ARQUIVOS_PAINEL = ["painel.py", "index.html", "manifest.webmanifest", "sw.js", "README.md",
-                   "icons/icone.svg", "icons/logo-teklabs.svg", "icons/icone-192.png", "icons/icone-512.png",
+                   "icons/icone.svg", "icons/icone-rede.svg", "icons/logo-teklabs.svg",
+                   "icons/icone-192.png", "icons/icone-512.png",
                    "icons/icone-maskable-512.png"]
 
 RESUMO = """

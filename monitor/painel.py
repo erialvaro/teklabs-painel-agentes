@@ -1434,6 +1434,7 @@ ESTATICOS = {
     "/sw.js": ("sw.js", "text/javascript; charset=utf-8"),
     "/icons/icone.svg": ("icons/icone.svg", "image/svg+xml"),
     "/icons/logo-teklabs.svg": ("icons/logo-teklabs.svg", "image/svg+xml"),
+    "/icons/icone-rede.svg": ("icons/icone-rede.svg", "image/svg+xml"),
     "/icons/icone-192.png": ("icons/icone-192.png", "image/png"),
     "/icons/icone-512.png": ("icons/icone-512.png", "image/png"),
     "/icons/icone-maskable-512.png": ("icons/icone-maskable-512.png", "image/png"),

@@ -58,14 +58,27 @@ Depois de mudar o arquivo, feche e abra o painel.
 
 ## Telas
 
-1. **Projetos**: todos os projetos da workspace. Primeiro vem quem tem um
-   gerente esperando você (por exemplo, um pedido de permissão), depois quem tem
-   time trabalhando; quem não teve time aparece apagado com "nenhum time ainda"
-   (ou "nenhum time nos últimos 7 dias", se só teve times antigos).
-2. **Detalhe do projeto** (clique no cartão): cada time dos últimos 7 dias, com
-   fases, números e a tabela de agentes.
+O cabeçalho fixo mostra a marca do painel, quando os dados foram atualizados (o
+ponto fica vermelho se a leitura falhar), o botão **Legenda** (explica medido,
+estimativa, informado pelo gerente e trabalhando; fecha com clique fora ou Esc) e
+o criador do projeto.
 
-A página se atualiza sozinha a cada 5 segundos.
+1. **Projetos**: no topo, três números (projetos trabalhando, agentes ativos
+   agora e projetos sem atividade). Abaixo, o filtro **Todos / Com time / Sem
+   atividade** e a busca por nome (o texto digitado não se perde na atualização
+   automática). Os projetos com time ou plano aparecem em cartões, na ordem: quem
+   tem um gerente esperando você (por exemplo, um pedido de permissão), depois
+   quem tem time trabalhando. Cada cartão mostra o plano (barra com uma parte por
+   fase), o gerente, o bloco medido e, sem plano, a estimativa. Os projetos sem
+   time ficam numa grade compacta "Sem atividade", com "nenhum time ainda" ou
+   "nenhum time nos últimos 7 dias".
+2. **Detalhe do projeto** (clique no cartão): no topo, o trocador para pular
+   entre os projetos com time. Depois, um alerta quando o gerente está esperando
+   você, o plano com as fases em colunas e cada time dos últimos 7 dias, com três
+   blocos (medido, estimativa e tokens), as fases medidas e a tabela de agentes.
+
+A página se atualiza sozinha a cada 5 segundos. Funciona nos temas claro e escuro
+do sistema e em janelas estreitas.
 
 ## Codex
 

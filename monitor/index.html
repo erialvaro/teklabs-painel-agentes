@@ -11,24 +11,48 @@
 <link rel="apple-touch-icon" href="/icons/icone-192.png">
 <style>
   :root {
-    --fundo: #f6f7f9;
+    --fundo: #f4f6f9;
     --cartao: #ffffff;
     --texto: #1b1f24;
     --suave: #5c6570;
+    --terciario: #a0a8b2;
     --linha: #e2e5ea;
+    --linha-suave: #eef0f3;
     --destaque: #2563eb;
+    --destaque-borda: #9db8f5;
     --ok: #15803d;
     --ok-fundo: #dcfce7;
     --vivo: #16a34a;
     --alerta: #b45309;
     --alerta-fundo: #fef3c7;
+    --alerta-texto: #92400e;
+    --aguardando: #f59e0b;
     --erro: #b91c1c;
     --erro-fundo: #fee2e2;
     --neutro-fundo: #eef0f3;
+    --plano-fundo: #f1f3f6;
     --barra-fundo: #e5e8ec;
     --medido: #2563eb;
     --estimado: #7c3aed;
-    --estimado-fundo: #f3effe;
+    --estimado-borda: #a78bfa;
+    --estimado-fundo: #f7f4fe;
+    --estimado-fundo-2: #fbf9ff;
+    --estimado-trilha: #ebe5fb;
+    --estimado-listra: #b99cf2;
+    --seg-fundo: #e9ecf1;
+    --inativo-fundo: #fafbfc;
+    --inativo-borda: #e8ebef;
+    --inativo-nome: #3a424c;
+    --inativo-sub: #7a838e;
+    --inativo-hover-borda: #c9d3e0;
+    --tracejado: #d4d8de;
+    --cinza-ponto: #94a3b8;
+    --busca-icone: #8a939e;
+    --sombra: rgba(11, 31, 58, .04);
+    --sombra-hover: rgba(11, 31, 58, .08);
+    --sombra-seg: rgba(11, 31, 58, .12);
+    --sombra-popover: rgba(11, 31, 58, .22);
+    --cabecalho: #0b1f3a;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -36,143 +60,311 @@
       --cartao: #171b20;
       --texto: #e6e9ed;
       --suave: #9aa4b0;
+      --terciario: #6b7480;
       --linha: #2a3038;
+      --linha-suave: #222830;
       --destaque: #6ea0ff;
+      --destaque-borda: #3d5a99;
       --ok: #4ade80;
       --ok-fundo: #12301f;
       --vivo: #4ade80;
       --alerta: #fbbf24;
       --alerta-fundo: #33270c;
+      --alerta-texto: #fcd34d;
+      --aguardando: #fbbf24;
       --erro: #f87171;
       --erro-fundo: #3a1414;
       --neutro-fundo: #232830;
+      --plano-fundo: #1d2229;
       --barra-fundo: #262c34;
       --medido: #6ea0ff;
       --estimado: #b294ff;
+      --estimado-borda: #6d4fc4;
       --estimado-fundo: #221a36;
+      --estimado-fundo-2: #1d1830;
+      --estimado-trilha: #2c2244;
+      --estimado-listra: #7a5fd0;
+      --seg-fundo: #20252c;
+      --inativo-fundo: #14181d;
+      --inativo-borda: #262c34;
+      --inativo-nome: #b7c0cb;
+      --inativo-sub: #7d8793;
+      --inativo-hover-borda: #3a4350;
+      --tracejado: #3a4350;
+      --cinza-ponto: #6b7480;
+      --busca-icone: #7d8793;
+      --sombra: rgba(0, 0, 0, .25);
+      --sombra-hover: rgba(0, 0, 0, .35);
+      --sombra-seg: rgba(0, 0, 0, .4);
+      --sombra-popover: rgba(0, 0, 0, .5);
     }
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--fundo); color: var(--texto);
-    font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
-  }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
   a { color: var(--destaque); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .pagina { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
-  header { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
-  h1 { font-size: 22px; margin: 0; }
-  h2 { font-size: 18px; margin: 0; }
-  .sub { color: var(--suave); font-size: 13px; }
-  .legenda { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--suave); margin: 10px 0 20px; }
-  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
-  .amostra { width: 26px; height: 10px; border-radius: 5px; display: inline-block; }
+  button { font: inherit; }
+  h1, h2 { margin: 0; }
+  .so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---------- cabeçalho (escuro nos dois temas) ---------- */
+  .topo-app { position: sticky; top: 0; z-index: 5; background: var(--cabecalho); box-shadow: 0 1px 0 rgba(255,255,255,.06); }
+  .topo-int { max-width: 1240px; margin: 0 auto; padding: 12px 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .marca { display: flex; align-items: center; gap: 12px; color: #fff; }
+  .marca > img { display: block; flex: none; }
+  .marca-col { display: flex; flex-direction: column; gap: 4px; }
+  .marca-titulo { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.1; letter-spacing: -.01em; white-space: nowrap; }
+  .marca-linha { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8fa3bd; white-space: nowrap; }
+  .marca-linha img { display: block; }
+  .espaco { flex: 1; }
+  .status-area { position: relative; display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+  .pilula { display: inline-flex; align-items: center; gap: 7px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 5px 12px; color: #dbe4f0; background: transparent; font-size: 12.5px; line-height: 1.3; white-space: nowrap; }
+  button.pilula { cursor: pointer; }
+  button.pilula:hover { border-color: rgba(255,255,255,.35); }
+  button.pilula[aria-expanded="true"] { background: rgba(255,255,255,.12); }
+  .ponto-status { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; position: relative; flex: none; }
+  .ponto-status::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #4ade80; animation: pulso 1.6s ease-out infinite; }
+  .ponto-status.erro, .ponto-status.erro::after { background: #f87171; border-color: #f87171; }
+  .ponto-status.erro::after { background: transparent; }
+  .popover { position: absolute; top: calc(100% + 10px); right: 0; width: 340px; max-width: calc(100vw - 32px); background: var(--cartao); border: 1px solid var(--linha); border-radius: 12px; box-shadow: 0 14px 36px var(--sombra-popover); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--texto); z-index: 6; }
+  .popover[hidden] { display: none; }
+  .popover .linha-leg { display: flex; align-items: center; gap: 10px; }
+  .amostra { width: 26px; height: 9px; border-radius: 5px; display: inline-block; flex: none; }
   .amostra.medido { background: var(--medido); }
   .amostra.estimado { background: repeating-linear-gradient(135deg, var(--estimado) 0 4px, transparent 4px 8px); border: 1px solid var(--estimado); }
-  .aviso { background: var(--alerta-fundo); color: var(--alerta); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+  .amostra.declarado { background: var(--neutro-fundo); border: 1px solid var(--suave); }
+  .amostra.vivo { width: 26px; display: inline-flex; justify-content: center; align-items: center; }
+  .criador { display: flex; align-items: center; gap: 10px; padding-left: 16px; border-left: 1px solid rgba(255,255,255,.12); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #5b7cff, #a78bfa); color: #fff; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .criador-col { display: flex; flex-direction: column; line-height: 1.2; }
+  .criador-rotulo { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #7088a6; }
+  .criador-nome { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; }
+  .criador-nome:hover { text-decoration: underline; }
+  .btn-linkedin { width: 30px; height: 30px; border-radius: 8px; background: rgba(112,181,249,.14); color: #70b5f9; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .btn-linkedin:hover { background: rgba(112,181,249,.26); }
 
-  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-  .cartao { background: var(--cartao); border: 1px solid var(--linha); border-radius: 12px; padding: 16px; }
-  a.cartao { display: block; color: inherit; }
-  a.cartao:hover { text-decoration: none; border-color: var(--destaque); }
-  .cartao.apagado { opacity: .55; }
-  .cartao .topo { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
-  .nome-projeto { font-weight: 600; font-size: 16px; word-break: break-word; }
-  .time-nome { color: var(--suave); font-size: 13px; margin-top: 2px; }
-  .vazio { color: var(--suave); font-size: 14px; margin-top: 6px; }
+  /* ---------- conteúdo ---------- */
+  main { max-width: 1240px; margin: 0 auto; padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; }
+  main > div:empty { display: none; }
+  #conteudo { display: flex; flex-direction: column; gap: 22px; }
+  .aviso { background: var(--alerta-fundo); color: var(--alerta); padding: 10px 14px; border-radius: 8px; font-size: 14px; }
+  .avisos { display: flex; flex-direction: column; gap: 10px; }
+  .nota { font-size: 12px; color: var(--suave); }
+  .rotulo { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .rotulo.medido { color: var(--medido); }
+  .rotulo.estimado { color: var(--estimado); }
+  .rotulo.declarado { color: var(--suave); }
 
   .selo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; background: var(--neutro-fundo); color: var(--suave); }
+  .selo.peq { padding: 1px 8px; }
   .selo.trabalhando { background: var(--ok-fundo); color: var(--ok); }
   .selo.concluido { background: var(--neutro-fundo); color: var(--texto); }
   .selo.andamento { background: var(--neutro-fundo); color: var(--destaque); }
   .selo.parado, .selo.interrompido { background: var(--alerta-fundo); color: var(--alerta); }
   .selo.falhou { background: var(--erro-fundo); color: var(--erro); }
-  .ponto { width: 8px; height: 8px; border-radius: 50%; background: var(--vivo); position: relative; flex: none; }
+  .ponto { width: 8px; height: 8px; border-radius: 50%; background: var(--vivo); position: relative; flex: none; display: inline-block; }
   .ponto::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--vivo); animation: pulso 1.6s ease-out infinite; }
   @keyframes pulso { from { transform: scale(.5); opacity: .9; } to { transform: scale(1.6); opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) { .ponto::after { animation: none; opacity: .5; } }
-
-  .bloco { margin-top: 12px; border-radius: 8px; padding: 10px 12px; }
-  .bloco.medido { border: 1px solid var(--linha); }
-  .bloco.estimado { background: var(--estimado-fundo); border: 1px dashed var(--estimado); }
-  .rotulo { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
-  .bloco.medido .rotulo { color: var(--medido); }
-  .bloco.estimado .rotulo { color: var(--estimado); }
-  .numeros { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; }
-  .numeros b { font-variant-numeric: tabular-nums; }
-  .barra { height: 10px; border-radius: 5px; background: var(--barra-fundo); overflow: hidden; margin: 6px 0 4px; }
-  .barra > i { display: block; height: 100%; border-radius: 5px; }
-  .barra.medido > i { background: var(--medido); }
-  .barra.estimado > i { background: repeating-linear-gradient(135deg, var(--estimado) 0 6px, color-mix(in srgb, var(--estimado) 55%, transparent) 6px 12px); }
-  .nota { font-size: 12px; color: var(--suave); }
-  .marca { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 0 14px; margin-bottom: 14px; border-bottom: 1px solid var(--linha); }
-  .marca .logo { border-radius: 6px; display: block; }
-  .marca-texto { display: flex; flex-direction: column; line-height: 1.2; }
-  .marca-nome { font-weight: 700; letter-spacing: .02em; }
-  .marca-lema { font-size: 12px; color: var(--suave); }
-  .assinatura { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--suave); }
-  .assinatura { gap: 5px; }
-  .autor { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-  .linkedin { display: inline-flex; color: #0a66c2; }
-  .linkedin:hover { opacity: .8; }
-  @media (prefers-color-scheme: dark) { .linkedin { color: #70b5f9; } }
-  @media (max-width: 640px) { .assinatura { margin-left: 0; } }
-  .bloco.declarado { border: 1px solid var(--linha); background: var(--neutro-fundo); }
-  .bloco.declarado .rotulo { color: var(--suave); }
-  .linha-fase { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid var(--linha); }
-  .linha-fase:last-child { border-bottom: 0; }
-  .linha-fase > .nota:last-child { flex-basis: 100%; }
-  .amostra.declarado { background: var(--neutro-fundo); border: 1px solid var(--suave); }
-  .gerente { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 14px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--linha); }
-
-  .voltar { display: inline-block; margin-bottom: 14px; font-size: 14px; }
-  .time { margin-bottom: 18px; }
-  .time .cabeca { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  @media (prefers-reduced-motion: reduce) { .ponto::after, .ponto-status::after { animation: none; opacity: .5; } }
   .etiqueta { font-size: 12px; border: 1px solid var(--linha); border-radius: 6px; padding: 1px 7px; color: var(--suave); }
-  .colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 720px) { .colunas { grid-template-columns: 1fr; } }
 
-  .fases { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  /* cabeçalho da lista */
+  .cab-lista { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+  .cab-lista h1 { font-size: 26px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; }
+  .caminho { margin-top: 6px; font: 12.5px ui-monospace, Consolas, monospace; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 640px; }
+  .faixa-num { display: flex; background: var(--cartao); border: 1px solid var(--linha); border-radius: 12px; overflow: hidden; }
+  .faixa-num > div { padding: 10px 18px; border-left: 1px solid var(--linha-suave); }
+  .faixa-num > div:first-child { border-left: 0; }
+  .faixa-num b { display: block; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .faixa-num span { font-size: 12px; color: var(--suave); white-space: nowrap; }
+  .faixa-num .verde b { color: var(--ok); }
+  .faixa-num .cinza b { color: var(--suave); }
+
+  /* filtro e busca (fora da área redesenhada) */
+  .filtros { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .filtros[hidden] { display: none; }
+  .segmentado { display: inline-flex; background: var(--seg-fundo); border-radius: 10px; padding: 3px; gap: 2px; }
+  .segmentado button { border: 0; background: transparent; color: var(--suave); font-size: 13px; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+  .segmentado button[aria-pressed="true"] { background: var(--cartao); color: var(--texto); font-weight: 600; box-shadow: 0 1px 2px var(--sombra-seg); }
+  .segmentado .cont { opacity: .6; margin-left: 4px; font-weight: 400; }
+  .busca { flex: 0 1 280px; display: flex; align-items: center; gap: 8px; background: var(--cartao); border: 1px solid var(--linha); border-radius: 10px; padding: 7px 12px; color: var(--busca-icone); }
+  .busca:focus-within { border-color: var(--destaque); }
+  .busca input { border: 0; outline: 0; background: transparent; color: var(--texto); font: inherit; font-size: 14px; width: 100%; }
+  .vazio-tracejado { border: 1px dashed var(--tracejado); border-radius: 12px; padding: 28px; text-align: center; color: var(--suave); font-size: 14px; }
+
+  /* cartões de projeto */
+  .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+  a.cartao-proj { background: var(--cartao); border: 1px solid var(--linha); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 2px var(--sombra); transition: border-color .15s, box-shadow .15s; color: inherit; }
+  a.cartao-proj:hover { border-color: var(--destaque-borda); box-shadow: 0 8px 24px var(--sombra-hover); text-decoration: none; }
+  .cp-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .cp-nome { font-size: 17px; font-weight: 700; word-break: break-word; }
+  .cp-sub { font-size: 13px; color: var(--suave); }
+  .caixa-plano { background: var(--plano-fundo); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .caixa-plano .demanda { font-size: 14px; line-height: 1.4; }
+  .segmentos { display: flex; gap: 4px; }
+  .segmentos i { flex: 1; height: 5px; border-radius: 3px; background: var(--linha); }
+  .segmentos i.feita { background: var(--ok); }
+  .segmentos i.atual { background: var(--destaque); }
+  .linha-plano { font-size: 12.5px; color: var(--suave); }
+  .linha-gerente { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; }
+  .linha-gerente .rot { color: var(--suave); }
+  .linha-gerente .nota { flex-basis: 100%; }
+  .medido-card { border-top: 1px solid var(--linha-suave); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .nums { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  .nums > div b { display: block; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .nums > div > span { font-size: 12px; color: var(--suave); }
+  .nums .verde b { color: var(--ok); }
+  .nums.grandes > div b { font-size: 22px; }
+  .barra { height: 6px; border-radius: 3px; background: var(--barra-fundo); overflow: hidden; }
+  .barra > i { display: block; height: 100%; border-radius: 3px; background: var(--medido); }
+  .barra.est { background: var(--estimado-trilha); }
+  .barra.est > i { background: repeating-linear-gradient(135deg, var(--estimado) 0 5px, var(--estimado-listra) 5px 10px); }
+  .est-card { background: var(--estimado-fundo); border: 1px dashed var(--estimado-borda); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .est-card .linha { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; font-size: 13px; }
+  .est-card .linha .suave { color: var(--suave); }
+  .cp-rodape { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: var(--suave); margin-top: auto; }
+  .cp-rodape .abrir { color: var(--destaque); font-weight: 600; font-size: 13px; white-space: nowrap; }
+
+  /* projetos sem atividade */
+  .sec-titulo { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .sec-titulo h2 { font-size: 15px; }
+  .sec-titulo span { font-size: 13px; color: var(--suave); }
+  .grade-inativos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 10px; }
+  a.inativo { background: var(--inativo-fundo); border: 1px solid var(--inativo-borda); border-radius: 10px; padding: 10px 14px; color: inherit; display: flex; flex-direction: column; min-width: 0; }
+  a.inativo:hover { background: var(--cartao); border-color: var(--inativo-hover-borda); }
+  .inativo .nome { font-size: 14px; font-weight: 600; color: var(--inativo-nome); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .inativo .sub { font-size: 12px; color: var(--inativo-sub); }
+  .rodape { font-size: 12px; color: var(--suave); }
+
+  /* detalhe do projeto */
+  .trocador { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+  .trocador a { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--linha); background: var(--cartao); color: var(--texto); border-radius: 999px; padding: 5px 12px; font-size: 13px; white-space: nowrap; flex: none; }
+  .trocador a:hover { border-color: var(--destaque); }
+  .trocador a.atual { background: var(--cabecalho); border-color: var(--cabecalho); color: #fff; font-weight: 600; }
+  .ponto-sit { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--cinza-ponto); }
+  .ponto-sit.trabalhando { background: var(--vivo); }
+  .ponto-sit.aguardando { background: var(--aguardando); }
+  .ponto-sit.andamento { background: var(--destaque); }
+  .titulo-proj { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .titulo-proj h1 { font-size: 28px; font-weight: 700; line-height: 1.2; word-break: break-word; }
+  .sub-proj { font-size: 13px; color: var(--suave); margin-top: 4px; }
+  .alerta { background: var(--alerta-fundo); color: var(--alerta-texto); border-radius: 10px; padding: 12px 16px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+  .alerta svg { flex: none; color: var(--alerta); }
+  .cartao { background: var(--cartao); border: 1px solid var(--linha); border-radius: 14px; }
+  .plano-det { padding: 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+  .plano-topo { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .plano-topo h2 { font-size: 18px; line-height: 1.35; margin: 4px 0; }
+  .plano-topo .meta { font-size: 12.5px; color: var(--suave); }
+  .contagem-fases { text-align: right; }
+  .contagem-fases b { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .contagem-fases .total { color: var(--terciario); font-weight: 400; font-size: 24px; }
+  .contagem-fases div { font-size: 12px; color: var(--suave); }
+  .colunas-fases { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .col-fase { border-top: 3px solid var(--linha); padding-top: 10px; display: flex; flex-direction: column; gap: 2px; font-size: 14px; min-width: 0; }
+  .col-fase .cod { font-weight: 700; color: var(--suave); }
+  .col-fase .tit { font-weight: 600; }
+  .col-fase .sit { font-size: 12.5px; color: var(--suave); }
+  .col-fase .med { font-size: 12px; color: var(--suave); }
+  .col-fase .det { font-size: 12px; color: var(--suave); margin-top: 4px; }
+  .col-fase.feita { border-top-color: var(--ok); }
+  .col-fase.feita .cod, .col-fase.feita .sit { color: var(--ok); }
+  .col-fase.atual { border-top-color: var(--destaque); }
+  .col-fase.atual .cod, .col-fase.atual .sit { color: var(--destaque); }
+  .faixa-est { background: var(--estimado-fundo); border: 1px dashed var(--estimado-borda); border-radius: 8px; padding: 9px 12px; font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
+  .faixa-est .linha { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .time-det { overflow: hidden; }
+  .time-cabeca { padding: 18px 22px 16px; border-bottom: 1px solid var(--linha-suave); display: flex; flex-direction: column; gap: 6px; }
+  .time-cabeca .linha-tit { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .time-cabeca h2 { font-size: 18px; }
+  .time-cabeca .meta { font-size: 12.5px; color: var(--suave); }
+  .tres-blocos { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); border-bottom: 1px solid var(--linha-suave); }
+  .tres-blocos > div { padding: 16px 22px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--linha-suave); }
+  .tres-blocos > div:last-child { border-right: 0; }
+  .tres-blocos .bloco-est { background: var(--estimado-fundo-2); }
+  .tres-blocos .tit-est { font-size: 20px; font-weight: 600; line-height: 1.3; }
+  .faixa-fases { padding: 14px 22px; border-bottom: 1px solid var(--linha-suave); display: flex; flex-direction: column; gap: 8px; }
+  .fases { display: flex; flex-wrap: wrap; gap: 6px; }
   .fase { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--linha); color: var(--suave); }
   .fase.feita { background: var(--ok-fundo); color: var(--ok); border-color: transparent; }
   .fase.atual { border: 2px solid var(--destaque); color: var(--texto); font-weight: 600; }
   .fase small { opacity: .8; font-weight: 400; }
+  .tabela-envolve { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { background: var(--inativo-fundo); font-size: 12px; color: var(--suave); font-weight: 600; text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--linha-suave); white-space: nowrap; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--linha-suave); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: var(--inativo-fundo); }
+  th:first-child, td:first-child { padding-left: 22px; }
+  th:last-child, td:last-child { padding-right: 22px; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-  .tabela-envolve { overflow-x: auto; margin-top: 12px; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--linha); vertical-align: middle; }
-  th { font-size: 12px; color: var(--suave); font-weight: 600; }
-  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .rodape { margin-top: 28px; font-size: 12px; color: var(--suave); }
+  @media (max-width: 720px) {
+    .topo-int { padding: 12px 16px; }
+    main { padding: 20px 16px 48px; }
+    .cab-lista { flex-direction: column; align-items: stretch; }
+    .busca { flex: 1 1 100%; }
+    .tres-blocos > div { border-right: 0; border-bottom: 1px solid var(--linha-suave); }
+    .criador { padding-left: 0; border-left: 0; }
+  }
+  @media (max-width: 560px) {
+    .criador-rotulo { display: none; }
+    .criador { padding-left: 0; border-left: 0; }
+  }
 </style>
 </head>
 <body>
-<div class="pagina">
-  <div class="marca">
-    <img class="logo" src="/icons/logo-teklabs.svg" alt="teklabs" width="84" height="30">
-    <span class="marca-texto"><span class="marca-nome">TekLabs Digital</span><span class="marca-lema">Open Source Software &amp; AI</span></span>
-    <span class="assinatura">Criado por:
-      <a class="autor" href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer">Erick Álvaro da Silva</a>
-      · TekLabs Digital ·
-      <a class="linkedin" href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer"
+<header class="topo-app">
+  <div class="topo-int">
+    <a class="marca" href="#/">
+      <img src="/icons/icone-rede.svg" alt="" width="38" height="38">
+      <span class="marca-col">
+        <span class="marca-titulo">Painel de Agentes</span>
+        <span class="marca-linha">por <img src="/icons/logo-teklabs.svg" alt="TekLabs Digital" title="TekLabs Digital" width="47" height="17"><span class="so-leitor">TekLabs Digital</span> Open Source Software &amp; AI</span>
+      </span>
+    </a>
+    <span class="espaco"></span>
+    <div class="status-area">
+      <span class="pilula"><i class="ponto-status" id="ponto-status"></i><span id="status">carregando...</span></span>
+      <button class="pilula" id="btn-legenda" type="button" aria-expanded="false" aria-controls="legenda">
+        <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg>
+        Legenda
+      </button>
+      <div class="popover" id="legenda" role="dialog" aria-label="Legenda" hidden>
+        <div class="linha-leg"><i class="amostra medido"></i><span><b>Medido:</b> lido dos arquivos agora</span></div>
+        <div class="linha-leg"><i class="amostra estimado"></i><span><b>Estimativa:</b> cálculo aproximado, pode mudar</span></div>
+        <div class="linha-leg"><i class="amostra declarado"></i><span><b>Informado pelo gerente:</b> situação das fases no plano</span></div>
+        <div class="linha-leg"><span class="amostra vivo"><i class="ponto"></i></span><span><b>Trabalhando:</b> escreveu nos últimos 90 segundos</span></div>
+      </div>
+    </div>
+    <div class="criador">
+      <span class="avatar" aria-hidden="true">EA</span>
+      <span class="criador-col">
+        <span class="criador-rotulo">Criado por</span>
+        <a class="criador-nome" href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer">Erick Álvaro da Silva</a>
+      </span>
+      <a class="btn-linkedin" href="https://www.linkedin.com/in/erick-silva/" target="_blank" rel="noopener noreferrer"
          title="LinkedIn de Erick Álvaro da Silva" aria-label="LinkedIn de Erick Álvaro da Silva">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
       </a>
-    </span>
+    </div>
   </div>
-  <header>
-    <h1><a href="#/" style="color:inherit">Painel dos times de agentes</a></h1>
-    <div class="sub" id="status">carregando...</div>
-  </header>
-  <div class="legenda">
-    <span><i class="amostra medido"></i> Medido: lido dos arquivos agora</span>
-    <span><i class="amostra estimado"></i> Estimativa: cálculo aproximado, pode mudar</span>
-    <span><i class="amostra declarado"></i> Informado pelo gerente: situação das fases no plano</span>
-    <span><i class="ponto"></i> Trabalhando: escreveu nos últimos 90 segundos</span>
+</header>
+
+<main>
+  <div class="avisos" id="avisos"></div>
+  <div id="cab-lista"></div>
+  <div class="filtros" id="filtros" hidden>
+    <div class="segmentado" role="group" aria-label="Filtrar projetos">
+      <button type="button" data-filtro="todos" aria-pressed="true">Todos<span class="cont" id="cont-todos"></span></button>
+      <button type="button" data-filtro="ativos" aria-pressed="false">Com time<span class="cont" id="cont-ativos"></span></button>
+      <button type="button" data-filtro="inativos" aria-pressed="false">Sem atividade<span class="cont" id="cont-inativos"></span></button>
+    </div>
+    <label class="busca">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="busca" type="search" placeholder="Buscar projeto" aria-label="Buscar projeto" autocomplete="off">
+    </label>
   </div>
   <div id="conteudo"></div>
-  <div class="rodape">Atualiza sozinho a cada 5 segundos. O painel só lê arquivos e não interfere nos agentes.</div>
-</div>
+</main>
 
 <script>
 const SEM_PROJETO = "__sem_projeto__";
@@ -180,6 +372,9 @@ let dados = null;
 let erro = null;
 let erroConexao = false;
 let ultimaCarga = 0;
+let filtro = "todos";       // "todos" | "ativos" | "inativos"
+let busca = "";
+let legendaAberta = false;
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -250,67 +445,26 @@ function tokensCodex(tk) {
   if (!tk) return "sem dado";
   return `<span title="${esc(`entrada ${tokens(tk.entrada)} (das quais ${tokens(tk.cache)} em cache) · saída ${tokens(tk.saida)} (raciocínio ${tokens(tk.raciocinio)})`)}">${tokens(tk.total)}</span>`;
 }
-function selo(sit) {
+function selo(sit, pequeno) {
   const ponto = sit === "trabalhando" ? '<i class="ponto"></i>' : "";
-  return `<span class="selo ${CLASSE_SITUACAO[sit] ?? ""}">${ponto}${esc(TEXTO_SITUACAO[sit] ?? sit)}</span>`;
+  return `<span class="selo ${pequeno ? "peq " : ""}${CLASSE_SITUACAO[sit] ?? ""}">${ponto}${esc(TEXTO_SITUACAO[sit] ?? sit)}</span>`;
+}
+function classePonto(sit) {
+  if (sit === "trabalhando") return "trabalhando";
+  if (sit === "aguardando") return "aguardando";
+  if (sit === "em andamento" || sit === "ocupado") return "andamento";
+  return "";
 }
 
-function blocoMedido(t, compacto) {
-  const m = t.medido;
-  const pct = m.lancados ? Math.round((100 * m.concluidos) / m.lancados) : 0;
-  const palavra = t.tipo === "workflow"
-    ? (m.lancados === 1 ? "agente lançado" : "agentes lançados")
-    : (m.lancados === 1 ? "agente iniciado" : "agentes iniciados");
-  const itens = [
-    `<span><b>${m.lancados}</b> ${palavra}</span>`,
-    `<span><b>${m.concluidos}</b> ${m.concluidos === 1 ? "encerrado" : "encerrados"}</span>`,
-    `<span><b>${m.trabalhando}</b> trabalhando agora</span>`,
-  ];
-  if (t.tipo === "workflow" && m.iniciados !== m.lancados) itens.splice(1, 0, `<span><b>${m.iniciados}</b> já começaram</span>`);
-  if (m.repetidos) itens.push(`<span><b>${m.repetidos}</b> repetidos</span>`);
-  if (m.falharam) itens.push(`<span><b>${m.falharam}</b> falharam ou interrompidos</span>`);
-  if (!compacto) itens.push(`<span>rodando há <b>${duracao((t.situacao === "encerrado" ? t.ultima_escrita : dados.agora) - t.inicio)}</b></span>`);
-  const barra = t.tipo === "agentes"
-    ? `<div class="barra medido" title="${pct}% dos agentes já iniciados"><i style="width:${pct}%"></i></div>
-       <div class="nota">${m.concluidos} de ${m.lancados} agentes já iniciados terminaram. Não é o progresso do trabalho todo: o gerente pode iniciar mais agentes.</div>`
-    : "";
-  const g = t.gerente;
-  const linhaGerente = g
-    ? `<div class="gerente">Gerente: ${selo(g.situacao)}${g.motivo ? `<b>${esc(g.motivo)}</b>` : ""}<span class="nota">${g.nome_sessao ? "sessão " + esc(g.nome_sessao) + " · " : ""}última escrita na conversa ${haQuanto(g.ultima_escrita)}</span></div>`
-    : "";
-  if (!compacto && t.tipo === "codex") {
-    itens.push(`<span>tokens da conversa (contagem do Codex): <b>${tokensCodex(t.tokens_codex)}</b></span>`);
-    if (t.tokens_codex_subagentes) itens.push(`<span>subagentes: <b>${tokensCodex(t.tokens_codex_subagentes)}</b></span>`);
-  }
-  if (!compacto && (t.consumo_agentes || t.consumo_gerente)) {
-    itens.push(`<span>tokens dos agentes: <b>${consumoCurto(t.consumo_agentes)}</b></span>`);
-    if (t.consumo_gerente) itens.push(`<span>conversa do gerente (inteira): <b>${consumoCurto(t.consumo_gerente)}</b></span>`);
-  }
-  const semAgentes = t.tipo === "agentes" && !m.lancados;
-  const corpo = semAgentes
-    ? `<div class="nota">Nenhum especialista lançado ainda nesta sessão. Eles aparecem aqui assim que começarem.</div>`
-    : `<div class="numeros">${itens.join("")}</div>${barra}`;
-  return `<div class="bloco medido"><div class="rotulo">Medido</div>${linhaGerente}${corpo}</div>`;
-}
-
-function blocoEstimativa(t) {
-  const e = t.estimativa;
-  if (!e.base) {
-    return `<div class="bloco estimado"><div class="rotulo">Estimativa</div><div>${esc(t.tipo === "agentes" ? "Sem base para estimar: este time não tem fases declaradas." : "Sem base para estimar ainda.")}</div><div class="nota">${esc(e.motivo)}</div></div>`;
-  }
-  const falta = e.restante_segundos == null ? "sem base para o tempo restante" : e.restante_segundos === 0 ? "terminado" : "faltam cerca de " + duracao(e.restante_segundos);
-  return `<div class="bloco estimado"><div class="rotulo">Estimativa</div>
-    <div class="numeros"><span><b>${e.porcentagem}%</b> concluído</span><span>${falta}</span><span>cerca de <b>${e.total}</b> agentes no total</span></div>
-    <div class="barra estimado"><i style="width:${e.porcentagem}%"></i></div>
-    <div class="nota">É uma estimativa. O total de agentes não está gravado em lugar nenhum: foi calculado com a média de ${Number(e.media_por_fase).toLocaleString("pt-BR")} agentes por fase já concluída, vezes ${e.fases_restantes} ${e.fases_restantes === 1 ? "fase que falta" : "fases que faltam"}, somada aos agentes já lançados.</div></div>`;
-}
-
+// ---------- pedaços compartilhados ----------
 function timesDoProjeto(nome) {
   return dados.times.filter((t) => (nome === SEM_PROJETO ? t.projeto == null : t.projeto === nome));
 }
-
 function planosDoProjeto(nome) {
   return (dados.planos || []).filter((p) => (nome === SEM_PROJETO ? p.projeto == null : p.projeto === nome));
+}
+function timePrincipal(times) {
+  return times.find((x) => x.situacao === "aguardando") || times.find((x) => x.situacao === "trabalhando") || times[0];
 }
 
 const CLASSE_FASE_PLANO = { "aprovada": "feita", "em andamento": "atual", "em QA": "atual", "pendente": "futura" };
@@ -320,83 +474,185 @@ function faseAtualDoPlano(p) {
     || p.fases.find((f) => f.situacao === "pendente") || null;
 }
 
-function resumoPlano(p) {
-  const atual = faseAtualDoPlano(p);
-  const onde = p.situacao !== "em andamento" ? esc(p.situacao)
-    : atual ? `${esc(atual.id)} ${esc(atual.situacao)}` : "todas as fases aprovadas";
-  return `<div class="bloco declarado"><div class="rotulo">Plano (informado pelo gerente)</div>
-    <div>${esc(p.demanda)}</div>
-    <div class="numeros"><span><b>${p.fases_aprovadas}</b> de <b>${p.total_fases}</b> fases aprovadas pelo QA</span><span>agora: ${onde}</span></div></div>`;
+function linhaGerente(t) {
+  const g = t.gerente;
+  if (!g) return "";
+  return `<div class="linha-gerente"><span class="rot">Gerente</span>${selo(g.situacao, true)}${g.motivo ? `<b>${esc(g.motivo)}</b>` : ""}<span class="nota">${g.nome_sessao ? "sessão " + esc(g.nome_sessao) + " · " : ""}última escrita na conversa ${haQuanto(g.ultima_escrita)}</span></div>`;
 }
 
+function itensMedido(t) {
+  const m = t.medido;
+  const palavra = t.tipo === "workflow"
+    ? (m.lancados === 1 ? "agente lançado" : "agentes lançados")
+    : (m.lancados === 1 ? "agente iniciado" : "agentes iniciados");
+  const itens = [`<div><b>${m.lancados}</b><span>${palavra}</span></div>`];
+  if (t.tipo === "workflow" && m.iniciados !== m.lancados) itens.push(`<div><b>${m.iniciados}</b><span>já começaram</span></div>`);
+  itens.push(`<div><b>${m.concluidos}</b><span>${m.concluidos === 1 ? "encerrado" : "encerrados"}</span></div>`);
+  itens.push(`<div class="${m.trabalhando > 0 ? "verde" : ""}"><b>${m.trabalhando}</b><span>trabalhando agora</span></div>`);
+  if (m.repetidos) itens.push(`<div><b>${m.repetidos}</b><span>repetidos</span></div>`);
+  if (m.falharam) itens.push(`<div><b>${m.falharam}</b><span>falharam ou interrompidos</span></div>`);
+  return itens.join("");
+}
+function barraMedido(t) {
+  const m = t.medido;
+  const pct = m.lancados ? Math.round((100 * m.concluidos) / m.lancados) : 0;
+  return `<div class="barra" title="${pct}% dos agentes já iniciados"><i style="width:${pct}%"></i></div>`;
+}
+const NOTA_SEM_AGENTES = `<div class="nota">Nenhum especialista lançado ainda nesta sessão. Eles aparecem aqui assim que começarem.</div>`;
+
+function textoFalta(e) {
+  return e.restante_segundos == null ? "sem base para o tempo restante" : e.restante_segundos === 0 ? "terminado" : "faltam cerca de " + duracao(e.restante_segundos);
+}
+function notaEstimativa(e) {
+  return `É uma estimativa. O total de agentes não está gravado em lugar nenhum: foi calculado com a média de ${Number(e.media_por_fase).toLocaleString("pt-BR")} agentes por fase já concluída, vezes ${e.fases_restantes} ${e.fases_restantes === 1 ? "fase que falta" : "fases que faltam"}, somada aos agentes já lançados.`;
+}
+
+// ---------- tela 1: lista ----------
+function entradasLista() {
+  // um item por projeto (na ordem de dados.projetos) e, no fim, "Sem projeto identificado"
+  const itens = dados.projetos.map((p) => {
+    const times = timesDoProjeto(p.nome);
+    const plano = planosDoProjeto(p.nome).find((x) => x.situacao === "em andamento") || null;
+    return { nome: p.nome, rotulo: p.nome, times, plano, algum_time: p.algum_time };
+  });
+  const semTimes = timesDoProjeto(SEM_PROJETO), semPlanos = planosDoProjeto(SEM_PROJETO);
+  if (semTimes.length || semPlanos.length) {
+    itens.push({ nome: SEM_PROJETO, rotulo: "Sem projeto identificado", times: semTimes,
+                 plano: semPlanos.find((x) => x.situacao === "em andamento") || null, planos: semPlanos, especial: true });
+  }
+  for (const i of itens) i.ativo = i.times.length > 0 || !!i.plano || (i.especial && (i.planos || []).length > 0);
+  return itens;
+}
+
+function cartaoProjeto(i) {
+  const href = "#/projeto/" + encodeURIComponent(i.nome);
+  const t = i.times.length ? timePrincipal(i.times) : null;
+  let sub = "";
+  if (i.especial) {
+    const partes = [];
+    if (i.times.length) partes.push(`${i.times.length} ${i.times.length === 1 ? "time" : "times"}`);
+    if ((i.planos || []).length) partes.push(`${i.planos.length} ${i.planos.length === 1 ? "plano" : "planos"}`);
+    sub = `${partes.join(" e ")} fora das pastas da workspace`;
+  } else if (t) {
+    sub = `${esc(t.nome)} · última escrita ${haQuanto(t.ultima_escrita)}`;
+  }
+  let plano = "";
+  if (i.plano) {
+    const p = i.plano, atual = faseAtualDoPlano(p);
+    const onde = p.situacao !== "em andamento" ? esc(p.situacao)
+      : atual ? `${esc(atual.id)} ${esc(atual.situacao)}` : "todas as fases aprovadas";
+    const segs = p.fases.map((f) => `<i class="${CLASSE_FASE_PLANO[f.situacao] ?? ""}"></i>`).join("");
+    plano = `<div class="caixa-plano"><div class="rotulo declarado">Plano · informado pelo gerente</div>
+      <div class="demanda">${esc(p.demanda)}</div>
+      ${segs ? `<div class="segmentos">${segs}</div>` : ""}
+      <div class="linha-plano"><b>${p.fases_aprovadas}</b> de <b>${p.total_fases}</b> fases aprovadas pelo QA · agora: ${onde}</div></div>`;
+  }
+  let gerente = "", medido = "", estimativa = "";
+  if (t) {
+    gerente = linhaGerente(t);
+    const semAgentes = t.tipo === "agentes" && !t.medido.lancados;
+    medido = `<div class="medido-card"><div class="rotulo medido">Medido</div>${semAgentes ? NOTA_SEM_AGENTES : `<div class="nums">${itensMedido(t)}</div>${t.medido.lancados ? barraMedido(t) : ""}`}</div>`;
+    const e = t.estimativa;
+    if (!i.plano && e.base) {
+      estimativa = `<div class="est-card"><div class="linha"><span class="rotulo estimado">Estimativa</span><b>${e.porcentagem}% concluído</b><span>${textoFalta(e)}</span><span class="suave">cerca de ${e.total} agentes no total</span></div>
+        <div class="barra est"><i style="width:${e.porcentagem}%"></i></div></div>`;
+    }
+  }
+  const qtd = i.times.length;
+  const rodape = qtd > 1 ? `mais ${qtd - 1} ${qtd === 2 ? "time" : "times"} nos últimos 7 dias` : qtd === 1 ? "1 time nos últimos 7 dias" : "";
+  return `<a class="cartao-proj" href="${href}">
+    <div class="cp-topo"><div><div class="cp-nome">${esc(i.rotulo)}</div>${sub ? `<div class="cp-sub">${sub}</div>` : ""}</div>${t ? selo(t.situacao) : ""}</div>
+    ${plano}${gerente}${medido}${estimativa}
+    <div class="cp-rodape"><span>${rodape}</span><span class="abrir">Abrir projeto →</span></div></a>`;
+}
+
+function itemInativo(i) {
+  const sub = i.especial ? "fora das pastas da workspace" : (i.algum_time ? "nenhum time nos últimos 7 dias" : "nenhum time ainda");
+  return `<a class="inativo" href="#/projeto/${encodeURIComponent(i.nome)}"><span class="nome" title="${esc(i.rotulo)}">${esc(i.rotulo)}</span><span class="sub">${sub}</span></a>`;
+}
+
+function desenharCabecalhoLista(itens) {
+  const ativos = itens.filter((i) => i.ativo);
+  const trabalhando = ativos.filter((i) => i.times.length && timePrincipal(i.times).situacao === "trabalhando").length;
+  const agentesAgora = ativos.reduce((s, i) => s + (i.times.length ? timePrincipal(i.times).medido.trabalhando : 0), 0);
+  const semAtividade = itens.length - ativos.length;
+  document.getElementById("cab-lista").innerHTML = `<div class="cab-lista">
+    <div style="min-width:0"><h1>Painel dos times de agentes</h1><div class="caminho" title="${esc(dados.workspace)}">${esc(dados.workspace)}</div></div>
+    <div class="faixa-num">
+      <div class="verde"><b>${trabalhando}</b><span>trabalhando</span></div>
+      <div><b>${agentesAgora}</b><span>agentes ativos agora</span></div>
+      <div class="cinza"><b>${semAtividade}</b><span>sem atividade</span></div>
+    </div></div>`;
+  document.getElementById("cont-todos").textContent = " " + itens.length;
+  document.getElementById("cont-ativos").textContent = " " + ativos.length;
+  document.getElementById("cont-inativos").textContent = " " + semAtividade;
+}
+
+function telaLista() {
+  const itens = entradasLista();
+  desenharCabecalhoLista(itens);
+  const termo = busca.trim().toLocaleLowerCase("pt-BR");
+  const visiveis = itens.filter((i) => !termo || i.rotulo.toLocaleLowerCase("pt-BR").includes(termo));
+  const ativos = visiveis.filter((i) => i.ativo), inativos = visiveis.filter((i) => !i.ativo);
+  const partes = [];
+  if (!dados.workspace_existe) partes.push(`<div class="aviso">A pasta da workspace não foi encontrada: ${esc(dados.workspace)}. Veja no README como mudar.</div>`);
+  if (!visiveis.length) {
+    partes.push(`<div class="vazio-tracejado">Nenhum projeto com esse nome.</div>`);
+  } else {
+    if (filtro !== "inativos" && ativos.length) partes.push(`<div class="grade">${ativos.map(cartaoProjeto).join("")}</div>`);
+    if (filtro !== "ativos" && inativos.length) {
+      partes.push(`<section><div class="sec-titulo"><h2>Sem atividade</h2><span>nenhum time nos últimos 7 dias</span></div>
+        <div class="grade-inativos">${inativos.map(itemInativo).join("")}</div></section>`);
+    }
+    if ((filtro === "ativos" && !ativos.length) || (filtro === "inativos" && !inativos.length)) {
+      partes.push(`<div class="vazio-tracejado">${termo ? "Nenhum projeto com esse nome." : "Nenhum projeto neste filtro."}</div>`);
+    }
+  }
+  partes.push(`<div class="rodape">Atualiza sozinho a cada 5 segundos. O painel só lê arquivos e não interfere nos agentes.</div>`);
+  return partes.join("");
+}
+
+// ---------- tela 2: detalhe ----------
 function blocoPlano(p) {
-  const linhas = p.fases.map((f) => {
+  const colunas = p.fases.map((f) => {
+    const classe = CLASSE_FASE_PLANO[f.situacao] ?? "";
     const subs = f.subfases.length
-      ? `<div class="nota">${f.subfases.map((s) => `${esc(s.id)} ${esc(s.titulo)}: ${esc(s.situacao)}${s.agentes ? ` (${s.agentes} ${s.agentes === 1 ? "agente" : "agentes"})` : ""}`).join(" · ")}</div>`
+      ? `<div class="det">${f.subfases.map((s) => `${esc(s.id)} ${esc(s.titulo)}: ${esc(s.situacao)}${s.agentes ? ` (${s.agentes} ${s.agentes === 1 ? "agente" : "agentes"})` : ""}`).join(" · ")}</div>`
       : "";
-    const qa = f.qa.length ? `QA: ${f.qa.map((q) => selo(q.situacao)).join(" ")}` : "QA: ainda não chamado";
-    return `<div class="linha-fase">
-      <span class="fase ${CLASSE_FASE_PLANO[f.situacao] ?? ""}">${f.situacao === "aprovada" ? "✓ " : ""}${esc(f.id)} ${esc(f.titulo)} <small>${esc(f.situacao)}</small></span>
-      <span class="nota">medido: ${f.agentes} ${f.agentes === 1 ? "agente" : "agentes"}, ${f.trabalhando} trabalhando, ${f.encerrados} encerrados · ${qa} · tokens: especialistas ${consumoCurto(f.consumo_especialistas)}, QA ${consumoCurto(f.consumo_qa)}</span>
+    const qaCurto = f.qa.length ? `QA ${f.qa.map((q) => esc(TEXTO_SITUACAO[q.situacao] ?? q.situacao)).join(", ")}` : "QA: ainda não chamado";
+    const qa = f.qa.length ? `QA: ${f.qa.map((q) => selo(q.situacao, true)).join(" ")}` : "QA: ainda não chamado";
+    return `<div class="col-fase ${classe}">
+      <div><span class="cod">${esc(f.id)}</span> <span class="tit">${esc(f.titulo)}</span></div>
+      <div class="sit">${f.situacao === "aprovada" ? "✓ aprovada" : esc(f.situacao)}</div>
+      <div class="med">${f.agentes} ${f.agentes === 1 ? "agente" : "agentes"} · ${qaCurto}</div>
+      <div class="det">medido: ${f.agentes} ${f.agentes === 1 ? "agente" : "agentes"}, ${f.trabalhando} trabalhando, ${f.encerrados} encerrados · ${qa} · tokens: especialistas ${consumoCurto(f.consumo_especialistas)}, QA ${consumoCurto(f.consumo_qa)}</div>
       ${subs}</div>`;
   }).join("");
   const e = p.estimativa;
   const est = e.base
-    ? `<div class="numeros"><span>${e.restante_segundos ? "faltam cerca de <b>" + duracao(e.restante_segundos) + "</b>" : "terminado"}</span>${e.total_agentes != null ? `<span>cerca de <b>${e.total_agentes}</b> agentes no total</span>` : ""}</div>
+    ? `<div class="linha"><span class="rotulo estimado">Estimativa</span><span>${e.restante_segundos ? "faltam cerca de <b>" + duracao(e.restante_segundos) + "</b>" : "terminado"}</span>${e.total_agentes != null ? `<span>cerca de <b>${e.total_agentes}</b> agentes no total</span>` : ""}</div>
        <div class="nota">É uma estimativa pelo ritmo das fases já aprovadas: tempo desde o início dividido pelas fases aprovadas, vezes as que faltam.</div>`
-    : `<div>${esc(e.motivo)}</div>`;
-  const semLigacao = p.agentes_ligados ? "" : `<div class="nota" style="margin-top:6px">Nenhum agente com o código da fase no nome (ex.: "F1.2 Especialista ...") foi encontrado ainda.</div>`;
-  return `<section class="cartao time">
-    <div class="cabeca"><h2>Plano: ${esc(p.demanda)}</h2><span class="etiqueta">${esc(p.situacao)}</span></div>
-    <div class="nota" style="margin-top:4px">Criado ${hora(p.criado_em)} · atualizado ${haQuanto(p.atualizado_em)} · arquivo ${esc(p.arquivo)}</div>
-    <div class="bloco declarado"><div class="rotulo">Fases (situação informada pelo gerente; agentes medidos)</div>${linhas}${semLigacao}</div>
-    <div class="bloco estimado"><div class="rotulo">Estimativa</div>${est}</div>
+    : `<div class="linha"><span class="rotulo estimado">Estimativa</span><span>${esc(e.motivo)}</span></div>`;
+  const semLigacao = p.agentes_ligados ? "" : `<div class="nota">Nenhum agente com o código da fase no nome (ex.: "F1.2 Especialista ...") foi encontrado ainda.</div>`;
+  return `<section class="cartao plano-det">
+    <div class="plano-topo">
+      <div style="min-width:0;flex:1"><div class="rotulo declarado">Plano · informado pelo gerente</div>
+        <h2>${esc(p.demanda)}</h2>
+        <div class="meta">Criado ${hora(p.criado_em)} · atualizado ${haQuanto(p.atualizado_em)} · arquivo ${esc(p.arquivo)} · <span class="etiqueta">${esc(p.situacao)}</span></div></div>
+      <div class="contagem-fases"><b>${p.fases_aprovadas}</b><span class="total"> / ${p.total_fases}</span><div>fases aprovadas pelo QA</div></div>
+    </div>
+    ${colunas ? `<div class="colunas-fases">${colunas}</div><div class="nota">Fases (situação informada pelo gerente; agentes medidos)</div>` : ""}
+    ${semLigacao}
+    <div class="faixa-est">${est}</div>
   </section>`;
-}
-
-function telaLista() {
-  const cartoes = [];
-  const semProjeto = timesDoProjeto(SEM_PROJETO);
-  const lista = dados.projetos.slice();
-  for (const p of lista) {
-    const times = timesDoProjeto(p.nome);
-    const href = "#/projeto/" + encodeURIComponent(p.nome);
-    const plano = planosDoProjeto(p.nome).find((x) => x.situacao === "em andamento");
-    const linhaPlano = plano ? resumoPlano(plano) : "";
-    if (!times.length && plano) {
-      cartoes.push(`<a class="cartao" href="${href}"><div class="nome-projeto">${esc(p.nome)}</div>${linhaPlano}</a>`);
-      continue;
-    }
-    if (!times.length) {
-      cartoes.push(`<a class="cartao apagado" href="${href}"><div class="nome-projeto">${esc(p.nome)}</div>
-        <div class="vazio">${p.algum_time ? "nenhum time nos últimos 7 dias" : "nenhum time ainda"}</div></a>`);
-      continue;
-    }
-    const t = times.find((x) => x.situacao === "aguardando") || times.find((x) => x.situacao === "trabalhando") || times[0];
-    const outros = times.length > 1 ? `<div class="nota" style="margin-top:8px">mais ${times.length - 1} ${times.length === 2 ? "time" : "times"} nos últimos 7 dias</div>` : "";
-    cartoes.push(`<a class="cartao" href="${href}">
-      <div class="topo"><div><div class="nome-projeto">${esc(p.nome)}</div><div class="time-nome">${esc(t.nome)} · última escrita ${haQuanto(t.ultima_escrita)}</div></div>${selo(t.situacao)}</div>
-      ${linhaPlano}${blocoMedido(t, true)}${plano ? "" : blocoEstimativa(t)}${outros}</a>`);
-  }
-  const planosSemProjeto = planosDoProjeto(SEM_PROJETO);
-  if (semProjeto.length || planosSemProjeto.length) {
-    const t = semProjeto[0];
-    const partes = [];
-    if (semProjeto.length) partes.push(`${semProjeto.length} ${semProjeto.length === 1 ? "time" : "times"}`);
-    if (planosSemProjeto.length) partes.push(`${planosSemProjeto.length} ${planosSemProjeto.length === 1 ? "plano" : "planos"}`);
-    cartoes.push(`<a class="cartao" href="#/projeto/${SEM_PROJETO}">
-      <div class="topo"><div><div class="nome-projeto">Sem projeto identificado</div><div class="time-nome">${partes.join(" e ")} fora das pastas da workspace</div></div>${t ? selo(t.situacao) : ""}</div></a>`);
-  }
-  const aviso = dados.workspace_existe ? "" : `<div class="aviso">A pasta da workspace não foi encontrada: ${esc(dados.workspace)}. Veja no README como mudar.</div>`;
-  return `${aviso}<div class="sub" style="margin-bottom:12px">Projetos em ${esc(dados.workspace)}</div><div class="grade">${cartoes.join("")}</div>`;
 }
 
 function blocoFases(t) {
   if (!t.fases.length) return "";
   const nomes = { feita: "feita", atual: "atual", futura: "ainda não começou" };
   const itens = t.fases.map((f) => `<span class="fase ${f.estado}" title="${nomes[f.estado]}">${f.estado === "feita" ? "✓ " : ""}${esc(f.titulo)} <small>${f.agentes} ${f.agentes === 1 ? "agente" : "agentes"}</small></span>`).join("");
-  return `<div class="bloco medido"><div class="rotulo">Fases (medido)</div><div class="fases">${itens}</div>
-    <div class="nota" style="margin-top:6px">Verde: feita. Contorno azul: atual. Cinza: ainda não começou.</div></div>`;
+  return `<div class="faixa-fases"><div class="rotulo medido">Fases</div><div class="fases">${itens}</div>
+    <div class="nota">Verde: feita. Contorno azul: atual. Cinza: ainda não começou.</div></div>`;
 }
 
 function tabelaAgentes(t) {
@@ -412,44 +668,92 @@ function tabelaAgentes(t) {
       <td class="num">${a.tokens_codex ? tokensCodex(a.tokens_codex) + " <small>Codex</small>" : consumoCurto(a.consumo)}</td>
     </tr>`).join("");
   return `<div class="tabela-envolve"><table>
-    <thead><tr><th>Agente</th>${temFase ? "<th>Fase</th>" : ""}<th>Situação</th><th>Começou</th><th>Tempo</th><th>Última escrita</th><th>Quanto escreveu</th><th title="Tokens equivalentes de entrada: entrada + 1,25 × cache criado + 0,1 × cache lido + 5 × saída. Passe o mouse no número para ver o detalhe.">Tokens (equiv.)</th></tr></thead>
+    <thead><tr><th>Agente</th>${temFase ? "<th>Fase</th>" : ""}<th>Situação</th><th class="num">Começou</th><th class="num">Tempo</th><th class="num">Última escrita</th><th class="num">Quanto escreveu</th><th class="num" title="Tokens equivalentes de entrada: entrada + 1,25 × cache criado + 0,1 × cache lido + 5 × saída. Passe o mouse no número para ver o detalhe.">Tokens (equiv.)</th></tr></thead>
     <tbody>${linhas || `<tr><td colspan="8" class="nota">Nenhum agente ainda.</td></tr>`}</tbody></table></div>`;
+}
+
+function cartaoTime(t) {
+  const tipo = t.tipo === "agentes" ? "agentes avulsos" : t.tipo === "codex" ? "Codex" : "time com roteiro";
+  const criterio = t.criterio_projeto.length ? "Projeto identificado por: " + t.criterio_projeto.join("; ") : "Projeto não identificado";
+  const naoConfirmado = t.tipo === "workflow" && !t.result_visto
+    ? `<div class="nota">Nenhum agente deste time registrou conclusão ainda. O formato desse registro ainda não foi visto num caso real; se um agente terminar e continuar aparecendo como em andamento, avise.</div>`
+    : "";
+  const semRoteiro = t.tipo === "workflow" && !t.roteiro_encontrado ? `<div class="nota">Roteiro do time não encontrado: sem nome nem fases declaradas.</div>` : "";
+  const m = t.medido;
+  const semAgentes = t.tipo === "agentes" && !m.lancados;
+  const rodando = `<div class="nota">rodando há <b>${duracao((t.situacao === "encerrado" ? t.ultima_escrita : dados.agora) - t.inicio)}</b></div>`;
+  const notaBarra = t.tipo === "agentes"
+    ? `<div class="nota">${m.concluidos} de ${m.lancados} agentes já iniciados terminaram. Não é o progresso do trabalho todo: o gerente pode iniciar mais agentes.</div>` : "";
+  const medido = `<div><div class="rotulo medido">Medido</div>${semAgentes ? NOTA_SEM_AGENTES
+    : `<div class="nums grandes">${itensMedido(t)}</div>${m.lancados ? barraMedido(t) : ""}${notaBarra}`}${rodando}</div>`;
+  const e = t.estimativa;
+  const estimativa = e.base
+    ? `<div class="bloco-est"><div class="rotulo estimado">Estimativa</div><div class="tit-est">${e.porcentagem}% · ${textoFalta(e)}</div>
+        <div class="nota">cerca de ${e.total} agentes no total</div>
+        <div class="barra est"><i style="width:${e.porcentagem}%"></i></div><div class="nota">${notaEstimativa(e)}</div></div>`
+    : `<div class="bloco-est"><div class="rotulo estimado">Estimativa</div><div class="tit-est">${esc(t.tipo === "agentes" ? "Sem base para estimar: este time não tem fases declaradas." : "Sem base para estimar ainda.")}</div><div class="nota">${esc(e.motivo)}</div></div>`;
+  const tok = [];
+  if (t.tipo === "codex") {
+    tok.push(`<div><b>${tokensCodex(t.tokens_codex)}</b><span>tokens da conversa (contagem do Codex)</span></div>`);
+    if (t.tokens_codex_subagentes) tok.push(`<div><b>${tokensCodex(t.tokens_codex_subagentes)}</b><span>subagentes</span></div>`);
+  }
+  if (t.consumo_agentes || t.consumo_gerente) {
+    tok.push(`<div><b>${consumoCurto(t.consumo_agentes)}</b><span>tokens dos agentes</span></div>`);
+    if (t.consumo_gerente) tok.push(`<div><b>${consumoCurto(t.consumo_gerente)}</b><span>conversa do gerente (inteira)</span></div>`);
+  }
+  const tokensBloco = `<div><div class="rotulo declarado">Tokens (equiv.)</div>${tok.length ? `<div class="nums grandes">${tok.join("")}</div>` : `<div class="nota">sem dado</div>`}</div>`;
+  return `<section class="cartao time-det">
+    <div class="time-cabeca">
+      <div class="linha-tit"><h2>${esc(t.nome)}</h2>${selo(t.situacao)}<span class="etiqueta">${tipo}</span></div>
+      <div class="meta">Começou ${hora(t.inicio)} · última escrita ${haQuanto(t.ultima_escrita)} · ${esc(criterio)}${t.tipo === "codex" && !t.projeto && t.pasta_codex ? " · pasta do Codex: " + esc(t.pasta_codex) : ""}</div>
+      ${linhaGerente(t)}${semRoteiro}${naoConfirmado}
+    </div>
+    <div class="tres-blocos">${medido}${estimativa}${tokensBloco}</div>
+    ${blocoFases(t)}
+    ${tabelaAgentes(t)}
+  </section>`;
 }
 
 function telaProjeto(nome) {
   const titulo = nome === SEM_PROJETO ? "Sem projeto identificado" : nome;
   const times = timesDoProjeto(nome);
-  const corpo = times.length ? times.map((t) => {
-    const tipo = t.tipo === "agentes" ? "agentes avulsos" : t.tipo === "codex" ? "Codex" : "time com roteiro";
-    const criterio = t.criterio_projeto.length ? "Projeto identificado por: " + t.criterio_projeto.join("; ") : "Projeto não identificado";
-    const naoConfirmado = t.tipo === "workflow" && !t.result_visto
-      ? `<div class="nota" style="margin-top:4px">Nenhum agente deste time registrou conclusão ainda. O formato desse registro ainda não foi visto num caso real; se um agente terminar e continuar aparecendo como em andamento, avise.</div>`
-      : "";
-    const semRoteiro = t.tipo === "workflow" && !t.roteiro_encontrado ? `<div class="nota">Roteiro do time não encontrado: sem nome nem fases declaradas.</div>` : "";
-    return `<section class="cartao time">
-      <div class="cabeca"><h2>${esc(t.nome)}</h2>${selo(t.situacao)}<span class="etiqueta">${tipo}</span></div>
-      <div class="nota" style="margin-top:4px">Começou ${hora(t.inicio)} · última escrita ${haQuanto(t.ultima_escrita)} · ${esc(criterio)}${t.tipo === "codex" && !t.projeto && t.pasta_codex ? " · pasta do Codex: " + esc(t.pasta_codex) : ""}</div>
-      ${semRoteiro}${naoConfirmado}
-      ${blocoFases(t)}
-      <div class="colunas">${blocoMedido(t, false)}${blocoEstimativa(t)}</div>
-      ${tabelaAgentes(t)}
-    </section>`;
-  }).join("") : `<div class="cartao apagado"><div class="vazio">Nenhum time trabalhou neste projeto nos últimos 7 dias.</div></div>`;
+  const itens = entradasLista().filter((i) => i.times.length || i.nome === nome);
+  const pilulas = itens.map((i) => {
+    const sit = i.times.length ? timePrincipal(i.times).situacao : "";
+    return `<a class="${i.nome === nome ? "atual" : ""}" href="#/projeto/${encodeURIComponent(i.nome)}"><i class="ponto-sit ${classePonto(sit)}"></i>${esc(i.rotulo)}</a>`;
+  }).join("");
+  const principal = times.length ? timePrincipal(times) : null;
+  const ultima = times.length ? Math.max(...times.map((t) => t.ultima_escrita || 0)) : 0;
+  const sub = times.length
+    ? `${times.length} ${times.length === 1 ? "time" : "times"} nos últimos 7 dias · última escrita ${haQuanto(ultima)}`
+    : "nenhum time nos últimos 7 dias";
+  const aguardando = times.some((t) => t.gerente && t.gerente.situacao === "aguardando");
+  const alerta = aguardando
+    ? `<div class="alerta"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l10 18H2L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>O gerente parou esperando você aprovar uma ação no Claude Code. O time não avança até você responder.</div>`
+    : "";
   const planos = planosDoProjeto(nome).map(blocoPlano).join("");
-  return `<a class="voltar" href="#/">← todos os projetos</a>
-    <h2 style="font-size:20px;margin-bottom:12px">${esc(titulo)}</h2>${planos}${corpo}`;
+  const corpo = times.length ? times.map(cartaoTime).join("")
+    : `<div class="vazio-tracejado">Nenhum time trabalhou neste projeto nos últimos 7 dias.</div>`;
+  return `<nav class="trocador" aria-label="Projetos"><a href="#/">← Todos os projetos</a>${pilulas}</nav>
+    <div><div class="titulo-proj"><h1>${esc(titulo)}</h1>${principal ? selo(principal.situacao) : ""}</div><div class="sub-proj">${sub}</div></div>
+    ${alerta}${planos}${corpo}`;
 }
 
+// ---------- ciclo ----------
 function desenhar() {
   const alvo = document.getElementById("conteudo");
-  if (!dados) { alvo.innerHTML = erro ? `<div class="aviso">${esc(erro)}</div>` : ""; return; }
+  const avisosEl = document.getElementById("avisos");
   const m = location.hash.match(/^#\/projeto\/(.+)$/);
+  document.getElementById("filtros").hidden = !!m || !dados;
+  if (m || !dados) document.getElementById("cab-lista").innerHTML = "";
+  if (!dados) { avisosEl.innerHTML = ""; alvo.innerHTML = erro ? `<div class="aviso">${esc(erro)}</div>` : ""; return; }
   const falha = erro ? `<div class="aviso">A última atualização falhou (${esc(erro)}). Mostrando os dados de ${haQuantoLocal(ultimaCarga)}.</div>` : "";
   const avisos = (dados.avisos || []).length
     ? `<div class="aviso">${dados.avisos.length === 1 ? "Um item não pôde ser lido e ficou de fora" : dados.avisos.length + " itens não puderam ser lidos e ficaram de fora"}: ${dados.avisos.map(esc).join("; ")}</div>`
     : "";
   const avisoPorta = dados.aviso_porta ? `<div class="aviso">${esc(dados.aviso_porta)}</div>` : "";
-  alvo.innerHTML = falha + avisoPorta + avisos +(m ? telaProjeto(decodeURIComponent(m[1])) : telaLista());
+  avisosEl.innerHTML = falha + avisoPorta + avisos;
+  alvo.innerHTML = m ? telaProjeto(decodeURIComponent(m[1])) : telaLista();
 }
 
 function haQuantoLocal(ms) {
@@ -458,6 +762,7 @@ function haQuantoLocal(ms) {
 
 function atualizarStatus() {
   const el = document.getElementById("status");
+  document.getElementById("ponto-status").classList.toggle("erro", !!erro);
   if (erro) { el.textContent = erroConexao ? "o servidor do painel está desligado (veja no README como abrir)" : "erro ao ler os dados: " + erro; return; }
   if (!ultimaCarga) return;
   el.textContent = "atualizado há " + Math.round((Date.now() - ultimaCarga) / 1000) + " s";
@@ -481,6 +786,22 @@ async function carregar() {
   desenhar();
   atualizarStatus();
 }
+
+// ---------- interações (a barra de filtros fica fora de #conteudo: busca não perde foco) ----------
+function abrirLegenda(abrir) {
+  legendaAberta = abrir;
+  document.getElementById("legenda").hidden = !abrir;
+  document.getElementById("btn-legenda").setAttribute("aria-expanded", String(abrir));
+}
+document.getElementById("btn-legenda").addEventListener("click", (ev) => { ev.stopPropagation(); abrirLegenda(!legendaAberta); });
+document.addEventListener("click", (ev) => { if (legendaAberta && !document.getElementById("legenda").contains(ev.target)) abrirLegenda(false); });
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && legendaAberta) abrirLegenda(false); });
+document.querySelectorAll(".segmentado button").forEach((b) => b.addEventListener("click", () => {
+  filtro = b.dataset.filtro;
+  document.querySelectorAll(".segmentado button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  if (dados) desenhar();
+}));
+document.getElementById("busca").addEventListener("input", (ev) => { busca = ev.target.value; if (dados) desenhar(); });
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js").catch(() => {});  // sem service worker o painel funciona igual, só não instala
